@@ -1,4 +1,5 @@
-import { ALL_ROLES, Role } from '../enums/role-enum';
+import { Role } from '../enums/role-enum';
+import { ALL_ROLES } from '../utils/all-roles';
 
 export const check = (role: Role, allowedRoles: Role[] = ALL_ROLES): boolean => {
     const exists: boolean = allowedRoles.includes(role);
