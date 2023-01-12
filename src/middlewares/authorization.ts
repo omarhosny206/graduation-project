@@ -1,8 +1,10 @@
 import { NextFunction, Request, Response } from 'express';
 
 import ApiError from '../utils/api-error';
+import { Role } from '../enums/role-enum';
+import * as roleService from '../services/role-service';
 
-export function authorizeByRole(...allowedRoles: string[]) {
+export function authorizeByRole(...allowedRoles: Role[]) {
     return async function (req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const _id: ObjectId = req.user._id as ObjectId;

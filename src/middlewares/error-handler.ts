@@ -1,8 +1,8 @@
-import IResponseError from '../interfaces/response-error-interface';
 import { ErrorRequestHandler, NextFunction, Request, Response } from 'express';
 
 import ApiError from '../utils/api-error';
 import ResponseError from '../utils/response-error';
+import IResponseError from '../interfaces/error/response-error-interface';
 
 export async function handle(
     error: Error,

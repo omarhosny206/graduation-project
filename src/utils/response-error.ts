@@ -1,7 +1,9 @@
-export default class ResponseError extends Error {
-    status: number;
+import { StatusCode } from '../enums/status-code-enum';
 
-    constructor(message: string, status: number) {
+export default class ResponseError extends Error {
+    status: StatusCode;
+
+    constructor(message: string, status: StatusCode) {
         super(message);
         this.status = status;
     }
