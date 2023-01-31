@@ -8,7 +8,7 @@ import ApiError from '../utils/api-error';
 export function authorizeByRole(...allowedRoles: Role[]) {
     return async function (req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const _id: ObjectId = req.user._id as ObjectId;
+            const _id: ObjectId = req.authenticatedUser._id as ObjectId;
             const user: IUser | null = await userService.getById(_id);
 
             if (!user) {

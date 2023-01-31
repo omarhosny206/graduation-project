@@ -23,7 +23,7 @@ export async function authenticateByAccessToken(req: Request, res: Response, nex
             throw ApiError.unauthorized('Unauthorized: user not found');
         }
 
-        req.authUser = user;
+        req.authenticatedUser = user;
         next();
     } catch (error) {
         return next(error);
