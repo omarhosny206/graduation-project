@@ -1,8 +1,8 @@
 import IUser from '../interfaces/user-interface';
-import StatusCode from '../utils/status-code';
-import { NextFunction, Request, RequestHandler, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { JwtPayload } from 'jsonwebtoken';
 
+import { StatusCode } from '../enums/status-code-enum';
 import * as userService from '../services/user-service';
 import ApiError from '../utils/api-error';
 import * as jwt from '../utils/jwt';
@@ -25,7 +25,7 @@ export async function regenerateAccessToken(req: Request, res: Response, next: N
         const accessToken: string = await jwt.generateAccessToken(payload.email);
         const newRefreshToken: string = await jwt.generateRefreshToken(payload.email);
 
-        return res.status(StatusCode.OK).json({ accessToken: accessToken, refreshToken: newRefreshToken });
+        return res.status(StatusCode.Ok).json({ accessToken: accessToken, refreshToken: newRefreshToken });
     } catch (error) {
         return next(error);
     }
