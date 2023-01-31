@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { ObjectId } from 'mongoose';
+import { Types } from 'mongoose';
 
 import { Role } from '../enums/role-enum';
 import * as roleService from '../services/role-service';
@@ -8,7 +8,7 @@ import ApiError from '../utils/api-error';
 export function authorizeByRole(...allowedRoles: Role[]) {
     return async function (req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const _id: ObjectId = req.authenticatedUser._id as ObjectId;
+            const _id: Types.ObjectId = req.authenticatedUser._id as Types.ObjectId;
             const user: IUser | null = await userService.getById(_id);
 
             if (!user) {
