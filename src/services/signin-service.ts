@@ -1,7 +1,7 @@
-import bcrypt from 'bcrypt';
-
 import ILoginRequest from '../interfaces/login-request-interface';
 import ILoginResponse from '../interfaces/login-response-interface';
+import bcrypt from 'bcrypt';
+
 import * as userService from '../services/user-service';
 import ApiError from '../utils/api-error';
 import * as jwt from '../utils/jwt';
@@ -22,8 +22,9 @@ export async function signin(loginRequest: ILoginRequest): Promise<ILoginRespons
             throw ApiError.unauthorized('Bad Credentials: Invalid password');
         }
 
-        const token = await jwt.generate(email);
-        return { user: storedUser, token: token };
+        const accessToken = await jwt.generateAccessToken(email);
+        const refreshToken = await jwt.generateRefreshToken(email);
+        return { user: storedUser, accessToken: accessToken, refreshToken: refreshToken };
     } catch (error) {
         throw ApiError.from(error);
     }
