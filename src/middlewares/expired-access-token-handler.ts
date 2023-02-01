@@ -7,7 +7,7 @@ import * as userService from '../services/user-service';
 import ApiError from '../utils/api-error';
 import * as jwt from '../utils/jwt';
 
-export async function regenerateAccessToken(req: Request, res: Response, next: NextFunction) {
+export async function regenerateTokens(req: Request, res: Response, next: NextFunction) {
     try {
         const refreshToken: string = req.body.refreshToken;
 

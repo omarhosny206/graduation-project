@@ -1,16 +1,41 @@
-import { Request, Response } from 'express';
+import IUser from '../interfaces/user-interface';
+import axios from 'axios';
+import * as dotenv from 'dotenv';
 
-import * as jwt from '../utils/jwt';
 import { StatusCode } from '../enums/status-code-enum';
+import * as userService from '../services/user-service';
+import ApiError from '../utils/api-error';
+import * as jwt from '../utils/jwt';
 
-export async function handleAuthenticatedUser(req: any, res: any): Promise<any> {
-    const isNewUser = !req.user._id;
+dotenv.config();
 
-    if (isNewUser) {
-        return res.status(StatusCode.Ok).json({ user: req.user });
+const GOOGLE_OAUTH2_URL: string | undefined = process.env.GOOGLE_OAUTH2_URL;
+
+export async function authenticateByAccessToken(req: any, res: any, next: any): Promise<any> {
+    try {
+        const { googleAccessToken } = req.body;
+
+        if (!googleAccessToken) {
+            throw ApiError.unauthorized('Unauthorized (google): google access token not provided');
+        }
+
+        const { data } = await axios.get(GOOGLE_OAUTH2_URL!, {
+            headers: { Authorization: `Bearer ${googleAccessToken}` },
+        });
+        const firstName: string = data.given_name;
+        const lastName: string = data.family_name;
+        const email: string = data.email;
+
+        const user: IUser | null = await userService.getByEmail(email);
+
+        if (!user) {
+            return res.status(StatusCode.Ok).json({ firstName: firstName, lastName: lastName, email: email });
+        }
+
+        const accessToken: string = await jwt.generateAccessToken(user.email);
+        const refreshToken: string = await jwt.generateRefreshToken(user.email);
+        return res.status(StatusCode.Ok).json({ user: user, accessToken: accessToken, refreshToken: refreshToken });
+    } catch (error) {
+        return next(error);
     }
-
-    const accessToken: string = await jwt.generateAccessToken(req.user.email);
-    const refreshToken: string = await jwt.generateRefreshToken(req.user.email);
-    return res.status(StatusCode.Ok).json({ user: req.user, accessToken: accessToken, refreshToken: refreshToken });
 }
