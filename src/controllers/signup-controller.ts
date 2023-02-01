@@ -1,6 +1,6 @@
+import IUser from "../interfaces/user-interface";
 import { NextFunction, Request, RequestHandler, Response } from "express";
 
-import IUser from "../interfaces/user-interface";
 import * as signupService from "../services/signup-service";
 
 export const signup: RequestHandler = async (
@@ -17,14 +17,14 @@ export const signup: RequestHandler = async (
     }
 };
 
-export const signupByGoogle: RequestHandler = async (
+export const signupByProviders: RequestHandler = async (
     req: Request<any, any, IUser>,
     res: Response<IUser>,
     next: NextFunction
 ): Promise<Response<IUser> | void> => {
     try {
         const user: IUser = req.body;
-        const savedUser: IUser = await signupService.signupByGoogle(user);
+        const savedUser: IUser = await signupService.signupByProviders(user);
         return res.status(201).json(savedUser);
     } catch (error) {
         return next(error);

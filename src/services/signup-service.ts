@@ -1,8 +1,8 @@
-import bcrypt from "bcrypt";
+import IUser from '../interfaces/user-interface';
+import bcrypt from 'bcrypt';
 
-import IUser from "../interfaces/user-interface";
-import * as userService from "../services/user-service";
-import ApiError from "../utils/api-error";
+import * as userService from '../services/user-service';
+import ApiError from '../utils/api-error';
 
 export const signup = async (user: IUser): Promise<IUser> => {
     try {
@@ -10,7 +10,7 @@ export const signup = async (user: IUser): Promise<IUser> => {
         const storedUser = await userService.getByEmail(email);
 
         if (storedUser) {
-            throw ApiError.badRequest("This email is already taken, choose another one");
+            throw ApiError.badRequest('This email is already taken, choose another one');
         }
 
         const hashedPassword: string = await bcrypt.hash(password, 10);
@@ -24,13 +24,13 @@ export const signup = async (user: IUser): Promise<IUser> => {
     }
 };
 
-export const signupByGoogle = async (user: IUser): Promise<IUser> => {
+export const signupByProviders = async (user: IUser): Promise<IUser> => {
     try {
         const { email } = user;
         const storedUser = await userService.getByEmail(email);
 
         if (storedUser) {
-            throw ApiError.badRequest("This email is already taken, choose another one");
+            throw ApiError.badRequest('This email is already taken, choose another one');
         }
 
         const password: string = Math.random().toString(36).slice(-8);
