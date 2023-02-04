@@ -14,7 +14,7 @@ const TWITTER_OAUTH2_ACCESS_TOKEN: string | undefined = process.env.TWITTER_OAUT
 const TWITTER_CLIENT_ID: string | undefined = process.env.TWITTER_CLIENT_ID;
 const TWITTER_CLIENT_SECRET: string | undefined = process.env.TWITTER_CLIENT_SECRET;
 
-export const authenticateByAccessToken = async (req: any, res: any, next: any): Promise<any> => {
+export async function authenticateByAccessToken(req: any, res: any, next: any): Promise<any> {
   try {
     const { screenName } = req.body;
 

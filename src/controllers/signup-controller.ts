@@ -1,13 +1,13 @@
-import IUser from "../interfaces/user-interface";
-import { NextFunction, Request, RequestHandler, Response } from "express";
+import IUser from '../interfaces/user-interface';
+import { NextFunction, Request, RequestHandler, Response } from 'express';
 
-import * as signupService from "../services/signup-service";
+import * as signupService from '../services/signup-service';
 
-export const signup: RequestHandler = async (
+export async function signup(
     req: Request<any, any, IUser>,
     res: Response<IUser>,
     next: NextFunction
-): Promise<Response<IUser> | void> => {
+): Promise<Response<IUser> | void> {
     try {
         const user: IUser = req.body;
         const savedUser: IUser = await signupService.signup(user);
@@ -15,13 +15,13 @@ export const signup: RequestHandler = async (
     } catch (error) {
         return next(error);
     }
-};
+}
 
-export const signupByProviders: RequestHandler = async (
+export async function signupByProviders(
     req: Request<any, any, IUser>,
     res: Response<IUser>,
     next: NextFunction
-): Promise<Response<IUser> | void> => {
+): Promise<Response<IUser> | void> {
     try {
         const user: IUser = req.body;
         const savedUser: IUser = await signupService.signupByProviders(user);
@@ -29,4 +29,4 @@ export const signupByProviders: RequestHandler = async (
     } catch (error) {
         return next(error);
     }
-};
+}
