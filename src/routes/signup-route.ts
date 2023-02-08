@@ -2,7 +2,7 @@ import { Router } from 'express';
 
 import * as signupController from '../controllers/signup-controller';
 import * as validator from '../middlewares/validator';
-import signupByGithubSchema from '../validations/signup-by-github-schema';
+import signupByGithubSchema from '../validations/signup-by-provider-schema';
 import signupByGoogleSchema from '../validations/signup-by-google-schema';
 import * as signupByLinkedinSchema from '../validations/signup-by-linkedin-schema';
 import signupByTwitterSchema from '../validations/signup-by-twitter-schema';
