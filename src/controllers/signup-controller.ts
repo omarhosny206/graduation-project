@@ -1,4 +1,4 @@
-import IUser from '../interfaces/user-interface';
+import IUser from '../interfaces/users/user-interface';
 import { NextFunction, Request, RequestHandler, Response } from 'express';
 
 import * as signupService from '../services/signup-service';

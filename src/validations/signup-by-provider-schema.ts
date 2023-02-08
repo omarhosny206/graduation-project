@@ -3,10 +3,9 @@ import { Role } from '../enums/role-enum';
 
 import IUser from '../interfaces/users/user-interface';
 
-const signupSchema: Joi.ObjectSchema<IUser> = Joi.object<IUser>({
+const signupByProviderSchema: Joi.ObjectSchema<IUser> = Joi.object<IUser>({
   email: Joi.string().email().lowercase().required(),
-  password: Joi.string().min(8).required(),
   role: Joi.string().valid([Role.Interviewee, Role.Intervieweer]).required(),
 });
 
-export default signupSchema;
+export default signupByProviderSchema;
