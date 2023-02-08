@@ -37,5 +37,5 @@ const userInfoSchema = new Schema<IUserInfo>(
   }
 );
 
-const UserInfoModel = model<IUser>('UserInfo', userInfoSchema);
+const UserInfoModel = model<IUserInfo>('UserInfo', userInfoSchema);
 export default UserInfoModel;
