@@ -1,6 +1,6 @@
 import { model, Schema } from 'mongoose';
+
 import IUserInfo from '../interfaces/users/user-info-interface';
-import IUser from '../interfaces/users/user-interface';
 
 const userInfoSchema = new Schema<IUserInfo>(
   {
@@ -19,6 +19,7 @@ const userInfoSchema = new Schema<IUserInfo>(
       ],
       required: false,
       default: [],
+      _id: false,
     },
     bio: { type: String, required: false, default: '' },
     interviewsHad: [{ type: Schema.Types.ObjectId, ref: 'Interview' }],
@@ -30,6 +31,7 @@ const userInfoSchema = new Schema<IUserInfo>(
         twitter: { type: String, required: false },
       },
       required: false,
+      _id: false,
     },
   },
   {
