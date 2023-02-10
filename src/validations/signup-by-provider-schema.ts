@@ -5,7 +5,7 @@ import IUser from '../interfaces/users/user-interface';
 
 const signupByProviderSchema: Joi.ObjectSchema<IUser> = Joi.object<IUser>({
   email: Joi.string().email().lowercase().required(),
-  role: Joi.string().valid([Role.Interviewee, Role.Interviewer]).required(),
+  role: Joi.string().valid(...[Role.Interviewee, Role.Interviewer]).required(),
 });
 
 export default signupByProviderSchema;

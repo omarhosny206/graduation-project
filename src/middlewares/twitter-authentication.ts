@@ -1,11 +1,11 @@
-import IUser from "../interfaces/user-interface";
-import axios from "axios";
-import * as dotenv from "dotenv";
+import IUser from '../interfaces/users/user-interface';
+import axios from 'axios';
+import * as dotenv from 'dotenv';
 
-import { StatusCode } from "../enums/status-code-enum";
-import * as userService from "../services/user-service";
-import ApiError from "../utils/api-error";
-import * as jwt from "../utils/jwt";
+import { StatusCode } from '../enums/status-code-enum';
+import * as userService from '../services/user-service';
+import ApiError from '../utils/api-error';
+import * as jwt from '../utils/jwt';
 
 dotenv.config();
 
@@ -19,7 +19,7 @@ export async function authenticateByAccessToken(req: any, res: any, next: any): 
     const { screenName } = req.body;
 
     if (!screenName) {
-      throw ApiError.unauthorized("Unauthorized (twitter): twitter screen name not provided");
+      throw ApiError.unauthorized('Unauthorized (twitter): twitter screen name not provided');
     }
 
     const { data: token } = await axios.post(
@@ -39,8 +39,8 @@ export async function authenticateByAccessToken(req: any, res: any, next: any): 
       headers: { Authorization: `Bearer ${twitterAccessToken}` },
     });
 
-    let [firstName, ...lastName] = data.name.split(" ");
-    lastName = lastName.join(" ");
+    let [firstName, ...lastName] = data.name.split(' ');
+    lastName = lastName.join(' ');
     const email: string = data.screen_name;
 
     const user: IUser | null = await userService.getByEmail(email);
@@ -55,4 +55,4 @@ export async function authenticateByAccessToken(req: any, res: any, next: any): 
   } catch (error) {
     return next(error);
   }
-};
+}

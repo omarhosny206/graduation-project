@@ -9,6 +9,7 @@ import expiredAccessTokenHandlerRoute from './routes/expired-access-token-handle
 import signinRoute from './routes/signin-route';
 import signupRoute from './routes/signup-route';
 import userRoute from './routes/user-route';
+import interviewRoute from './routes/interview-route';
 
 dotenv.config();
 
@@ -21,12 +22,13 @@ app.use(express.json());
 app.use('/signup', signupRoute);
 app.use('/signin', signinRoute);
 app.use('/users', userRoute);
+app.use('/interviews', interviewRoute);
 app.use('/token', expiredAccessTokenHandlerRoute);
 
 app.use(notFoundHandler.handle);
 app.use(errorHandler.handle);
 
 app.listen(PORT, async () => {
-    console.log('Server is running ....');
-    await connectToDb();
+  console.log('Server is running ....');
+  await connectToDb();
 });

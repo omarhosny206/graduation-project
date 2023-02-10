@@ -1,0 +1,100 @@
+import { NextFunction, Request, Response } from 'express';
+
+import { StatusCode } from '../enums/status-code-enum';
+import ITimeslot from '../interfaces/users/timeslot-interface';
+import IUserFilterCriteria from '../interfaces/users/user-filter-criteria-interface';
+import IUserInfo from '../interfaces/users/user-info-interface';
+import * as userService from '../services/user-service';
+
+export async function getAll(req: Request, res: Response, next: NextFunction) {
+  try {
+    const users = await userService.getAll();
+    return res.status(StatusCode.Ok).json(users);
+  } catch (error) {
+    return next(error);
+  }
+}
+
+export async function getProfile(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { username } = req.params;
+    const user = await userService.getProfile(username);
+    return res.status(StatusCode.Ok).json(user);
+  } catch (error) {
+    return next(error);
+  }
+}
+
+export async function filter(req: Request, res: Response, next: NextFunction) {
+  try {
+    const filterCriteria = req.query as IUserFilterCriteria;
+
+    if (filterCriteria.info) {
+      const info = filterCriteria.info;
+      console.log(typeof JSON.parse(JSON.stringify(info)));
+
+      filterCriteria.info = JSON.parse(JSON.stringify(filterCriteria.info));
+    }
+
+    console.log(filterCriteria);
+
+    const user = await userService.filter(filterCriteria);
+    return res.status(StatusCode.Ok).json(user);
+  } catch (error) {
+    return next(error);
+  }
+}
+
+export async function update(req: Request, res: Response, next: NextFunction) {
+  try {
+    const userInfo: IUserInfo = req.body;
+    const authenticatedUser = req.authenticatedUser;
+    await userService.update(authenticatedUser._id, userInfo);
+    return res.status(StatusCode.Ok).json({ message: 'Updated successfully' });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+export async function updatePrice(req: Request, res: Response, next: NextFunction) {
+  try {
+    const price = req.body.price as number;
+    const authenticatedUser = req.authenticatedUser;
+    const updatedUserInfo = await userService.updatePrice(authenticatedUser._id, price);
+    return res.status(StatusCode.Ok).json(updatedUserInfo);
+  } catch (error) {
+    return next(error);
+  }
+}
+
+export async function updateUsername(req: Request, res: Response, next: NextFunction) {
+  try {
+    const username = req.body.username as string;
+    const authenticatedUser = req.authenticatedUser;
+    const updatedUser = await userService.updateUsername(authenticatedUser._id, username);
+    return res.status(StatusCode.Ok).json(updatedUser);
+  } catch (error) {
+    return next(error);
+  }
+}
+
+export async function updateRole(req: Request, res: Response, next: NextFunction) {
+  try {
+    const authenticatedUser = req.authenticatedUser;
+    const updatedUser = await userService.updateRole(authenticatedUser._id);
+    return res.status(StatusCode.Ok).json(updatedUser);
+  } catch (error) {
+    return next(error);
+  }
+}
+
+export async function hasOverlappingTimeslots(req: Request, res: Response, next: NextFunction) {
+  try {
+    const timeslots = req.body.timeslots as ITimeslot[];
+    const authenticatedUser = req.authenticatedUser;
+    const result = await userService.hasOverlappingTimeslots(authenticatedUser._id, timeslots);
+    return res.status(StatusCode.Ok).json(result);
+  } catch (error) {
+    return next(error);
+  }
+}
