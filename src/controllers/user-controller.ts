@@ -51,7 +51,7 @@ export async function updatePrice(req: Request, res: Response, next: NextFunctio
   try {
     const price = req.body.price as number;
     const authenticatedUser = req.authenticatedUser;
-    const updatedUserInfo = await userService.updatePrice(authenticatedUser._id, price);
+    const updatedUserInfo = await userService.updatePrice(authenticatedUser, price);
     return res.status(StatusCode.Ok).json(updatedUserInfo);
   } catch (error) {
     return next(error);
@@ -62,7 +62,7 @@ export async function updateUsername(req: Request, res: Response, next: NextFunc
   try {
     const username = req.body.username as string;
     const authenticatedUser = req.authenticatedUser;
-    const updatedUser = await userService.updateUsername(authenticatedUser._id, username);
+    const updatedUser = await userService.updateUsername(authenticatedUser, username);
     return res.status(StatusCode.Ok).json(updatedUser);
   } catch (error) {
     return next(error);
@@ -72,7 +72,7 @@ export async function updateUsername(req: Request, res: Response, next: NextFunc
 export async function updateRole(req: Request, res: Response, next: NextFunction) {
   try {
     const authenticatedUser = req.authenticatedUser;
-    const updatedUser = await userService.updateRole(authenticatedUser._id);
+    const updatedUser = await userService.updateRole(authenticatedUser);
     return res.status(StatusCode.Ok).json(updatedUser);
   } catch (error) {
     return next(error);
@@ -101,7 +101,7 @@ export async function deleteById(req: Request, res: Response, next: NextFunction
 
 export async function editTimeslots(req: Request, res: Response, next: NextFunction) {
   try {
-    const timeslots = req.body.timeslots;
+    const timeslots = req.body.timeslots as ITimeslot[];
     const authenticatedUser = req.authenticatedUser;
     await userService.editTimeslots(authenticatedUser, timeslots);
     return res.status(StatusCode.Ok).json({ message: 'success' });

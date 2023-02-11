@@ -13,7 +13,10 @@ const router: Router = Router();
 
 router.get('/', userController.getAll);
 router.get('/filter', userController.filter);
-// router.get('/:username', userController.getProfile);
+router.get('/interviews-made/:username', userController.getInterviewsMade);
+router.get('/:username', userController.getProfile);
+router.get('/:_id', authentication.authenticateByAccessToken, userController.getById);
+
 router.put('/', authentication.authenticateByAccessToken, validator.validate(userInfoSchema), userController.update);
 router.put(
   '/username',
@@ -34,24 +37,18 @@ router.put(
   validator.validate(userUpdatePriceSchema),
   userController.updatePrice
 );
-// router.put(
-//   '/timeslots',
-//   authentication.authenticateByAccessToken,
-//   authorization.authorizeByRole(Role.Interviewer),
-//   userController.hasOverlappingTimeslots
-// );
-router.get('/:_id', authentication.authenticateByAccessToken, userController.getById);
-router.delete(
-  '/:_id',
-  authentication.authenticateByAccessToken,
-  // authorization.authorizeByRole(Role.Admin),
-  userController.deleteById
-);
 router.put(
   '/timeslots',
   authentication.authenticateByAccessToken,
   authorization.authorizeByRole(Role.Interviewer),
   userController.editTimeslots
 );
-router.get('/interviewsMade/:username', userController.getInterviewsMade)
+
+router.delete(
+  '/:_id',
+  authentication.authenticateByAccessToken,
+  // authorization.authorizeByRole(Role.Admin),
+  userController.deleteById
+);
+
 export default router;
