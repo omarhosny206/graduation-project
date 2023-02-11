@@ -31,27 +31,13 @@ export async function getByEmail(email: string) {
 
 export async function getProfile(username: string) {
   try {
-    const user = await (await getByUserName(username))?.populate('info');
+    const user = await getByUserName(username);
 
     if (!user) {
       throw ApiError.badRequest('user not found');
     }
 
     return user;
-  } catch (error) {
-    throw ApiError.from(error);
-  }
-}
-
-export async function getInfo(_id: Types.ObjectId) {
-  try {
-    const user = await (await getById(_id))?.populate('info');
-
-    if (!user) {
-      throw ApiError.badRequest('user not found');
-    }
-
-    return user.info;
   } catch (error) {
     throw ApiError.from(error);
   }
