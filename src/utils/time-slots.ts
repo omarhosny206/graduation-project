@@ -4,7 +4,7 @@ const SECONDS_PER_MINUTE = 60;
 const SECONDS_PER_HOUR = 3600;
 const SECONDS_PER_DAY = 86400;
 
-export function getNumberFormat(timeslots: ITimeslot[]) {
+function getNumberFormat(timeslots: ITimeslot[]) {
   const result = timeslots.map((timeslot) =>
     timeslot.hours
       .map((hour) => convertHourToValue(hour))
@@ -27,7 +27,7 @@ function convertHourToValue(hour: string) {
   return hourPartValue * SECONDS_PER_HOUR + minutePartValue * SECONDS_PER_MINUTE;
 }
 
-export function hasOverlappingInSameDay(numberFormat: number[][]) {
+function hasOverlappingInSameDay(numberFormat: number[][]) {
   for (let i = 0; i < numberFormat.length; ++i) {
     const values = numberFormat[i];
 
@@ -44,7 +44,7 @@ export function hasOverlappingInSameDay(numberFormat: number[][]) {
   return false;
 }
 
-export function hasOverlappingInDifferentDays(numberFormat: number[][]) {
+function hasOverlappingInDifferentDays(numberFormat: number[][]) {
   for (let i = 0; i < numberFormat.length; ++i) {
     const previousIndex = (i + numberFormat.length - 1) % numberFormat.length;
 
@@ -72,6 +72,16 @@ export function hasOverlappingInDifferentDays(numberFormat: number[][]) {
         return true;
       }
     }
+  }
+
+  return false;
+}
+
+export function hasOverlappingTimeslots(timeslots: ITimeslot[]) {
+  const numberFormat = getNumberFormat(timeslots);
+
+  if (hasOverlappingInSameDay(numberFormat) || hasOverlappingInDifferentDays(numberFormat)) {
+    return true;
   }
 
   return false;

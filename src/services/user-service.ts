@@ -5,11 +5,11 @@ import ITimeslot from '../interfaces/users/timeslot-interface';
 import IUserFilterCriteria from '../interfaces/users/user-filter-criteria-interface';
 import IUserInfo from '../interfaces/users/user-info-interface';
 import IUser from '../interfaces/users/user-interface';
-import UserInfoModel from '../models/user-info-model';
 import UserModel from '../models/user-model';
 import * as interviewService from '../services/interview-service';
 import ApiError from '../utils/api-error';
-import { getNumberFormat, hasOverlappingInDifferentDays, hasOverlappingInSameDay } from '../utils/time-slots';
+import { AuthenticatedUser } from '../utils/authenticated-user-type';
+import { hasOverlappingTimeslots } from '../utils/time-slots';
 
 export async function getAll() {
   try {
@@ -67,64 +67,35 @@ export async function filter(filterCriteria: IUserFilterCriteria) {
   }
 }
 
-export async function update(_id: Types.ObjectId, userInfo: IUserInfo) {
+export async function update(user: AuthenticatedUser, userInfo: IUserInfo) {
   try {
-    const savedUser = await getById(_id);
-
-    if (!savedUser) {
-      throw ApiError.badRequest('Cannot update, user not found');
+    if (user.info) {
+      Object.assign(user.info, userInfo);
+    } else {
+      user.info = userInfo;
     }
 
-    if (savedUser.info) {
-      await UserInfoModel.updateOne({ _id: savedUser.info._id }, userInfo);
-      return;
-    }
-
-    const savedUserInfo = await UserInfoModel.create(userInfo);
-    savedUser.info = savedUserInfo;
-    await savedUser.save();
+    await user.save();
   } catch (error) {
     throw ApiError.from(error);
   }
 }
 
-export async function updatePrice(_id: Types.ObjectId, price: number) {
-  const user = await getById(_id);
-
-  if (!user) {
-    throw ApiError.badRequest('Cannot update price, user not found');
-  }
-
+export async function updatePrice(user: AuthenticatedUser, price: number) {
   if (!user.info) {
     throw ApiError.badRequest('User info is required');
   }
 
-  if (user.role === Role.Interviewee) {
-    throw ApiError.badRequest('Interviewee cannot update price');
-  }
-
-  const userInfo = await UserInfoModel.findById(user.info);
-
-  if (!userInfo) {
-    throw ApiError.badRequest('User info is required');
-  }
-
-  if (!isIllegibleForPricing(userInfo!)) {
+  if (!isIllegibleForPricing(user.username)) {
     throw ApiError.badRequest('Cannot update price, user is not illegible for pricing');
   }
 
-  userInfo.price = price;
-  const updatedUserInfo = await userInfo.save();
-  return updatedUserInfo;
+  user.info.price = price;
+  const updatedUser = await user.save();
+  return updatedUser;
 }
 
-export async function updateUsername(_id: Types.ObjectId, username: string) {
-  const user = await getById(_id);
-
-  if (!user) {
-    throw ApiError.badRequest('Cannot update username, user not found');
-  }
-
+export async function updateUsername(user: AuthenticatedUser, username: string) {
   if (user.username === username) {
     return user;
   }
@@ -140,13 +111,7 @@ export async function updateUsername(_id: Types.ObjectId, username: string) {
   return updatedUser;
 }
 
-export async function updateRole(_id: Types.ObjectId) {
-  const user = await getById(_id);
-
-  if (!user) {
-    throw ApiError.badRequest('Cannot update username, user not found');
-  }
-
+export async function updateRole(user: AuthenticatedUser) {
   if (user.role === Role.Interviewer) {
     throw ApiError.badRequest('Interviewer cannot update role');
   }
@@ -161,27 +126,6 @@ export async function getInterviewsHad(username: string) {
   return interviewsHad;
 }
 
-export async function hasOverlappingTimeslots(_id: Types.ObjectId, timeslots: ITimeslot[]) {
-  const savedUserInfo = await getInfo(_id);
-
-  if (!savedUserInfo) {
-    throw ApiError.badRequest('user info is required');
-  }
-
-  const numberFormat = getNumberFormat(timeslots);
-
-  if (hasOverlappingInSameDay(numberFormat) || hasOverlappingInDifferentDays(numberFormat)) {
-    return true;
-  }
-
-  return false;
-}
-
-// ........................................................................................... //
-//  DELETE  //
-// ........................................................................................... //
-
-// delete
 export async function getById(_id: Types.ObjectId) {
   try {
     const user = await UserModel.findById(_id);
@@ -191,7 +135,6 @@ export async function getById(_id: Types.ObjectId) {
   }
 }
 
-// delete
 export async function getByUserName(username: string) {
   try {
     const user = await UserModel.findOne({ username: username });
@@ -201,23 +144,77 @@ export async function getByUserName(username: string) {
   }
 }
 
-// delete
 export async function save(user: IUser) {
   try {
-    const savedUser: IUser = await UserModel.create(user);
-    return savedUser;
+    const userToBeSaved: IUser = await UserModel.create(user);
+    return userToBeSaved;
   } catch (error) {
     throw ApiError.from(error);
   }
 }
 
-// delete
-export async function getInterviewsMade(username: string) {
-  const interviewsMade = await interviewService.getInterviewsMade(username);
-  return interviewsMade;
+export async function deleteById(_id: Types.ObjectId) {
+  try {
+    await UserModel.findOneAndDelete({ _id: _id });
+  } catch (error) {
+    throw ApiError.from(error);
+  }
 }
 
-// delete
-export async function isIllegibleForPricing(userInfo: IUserInfo) {
-  return true;
+export async function editTimeslots(user: AuthenticatedUser, timeslots: ITimeslot[]) {
+  try {
+    console.log(user);
+    if (!user.info) {
+      throw ApiError.badRequest('user info is required.');
+    }
+    if (hasOverlappingTimeslots(timeslots)) {
+      throw ApiError.badRequest('timeslots has overlapping.');
+    }
+    user.info.timeslots = timeslots;
+    await user.save();
+  } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
+export async function getInterviewsMade(username: string) {
+  try {
+    return await interviewService.getInterviewsMade(username);
+  } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
+export async function isIllegibleForPricing(username: string) {
+  try {
+    const userId = (await getByUserName(username))?._id;
+    const interviewsMade = await getInterviewsMade(username);
+
+    const interviewerRating = interviewsMade
+      .filter((interview) => interview.info && interview.info.reviews)
+      .map((interview) => {
+        for (const review of interview.info?.reviews!) {
+          if (review.to.toString() === userId?.toString()) {
+            return review.rating;
+          }
+        }
+      });
+
+    if (interviewerRating.length === 0) {
+      return false;
+    }
+
+    const ratingSum = interviewerRating.reduce((accumulator, currentVal) => {
+      return accumulator! + currentVal!;
+    }, 0);
+
+    const avgRating = ratingSum! / interviewerRating.length;
+
+    if (avgRating! >= 3) {
+      return true;
+    }
+    return false;
+  } catch (error) {
+    throw ApiError.from(error);
+  }
 }
