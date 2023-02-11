@@ -163,13 +163,14 @@ export async function deleteById(_id: Types.ObjectId) {
 
 export async function editTimeslots(user: AuthenticatedUser, timeslots: ITimeslot[]) {
   try {
-    console.log(user);
     if (!user.info) {
       throw ApiError.badRequest('user info is required.');
     }
+
     if (hasOverlappingTimeslots(timeslots)) {
       throw ApiError.badRequest('timeslots has overlapping.');
     }
+
     user.info.timeslots = timeslots;
     await user.save();
   } catch (error) {

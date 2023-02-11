@@ -28,17 +28,7 @@ export async function getProfile(req: Request, res: Response, next: NextFunction
 
 export async function filter(req: Request, res: Response, next: NextFunction) {
   try {
-    const filterCriteria = req.query as IUserFilterCriteria;
-
-    if (filterCriteria.info) {
-      const info = filterCriteria.info;
-      console.log(typeof JSON.parse(JSON.stringify(info)));
-
-      filterCriteria.info = JSON.parse(JSON.stringify(filterCriteria.info));
-    }
-
-    console.log(filterCriteria);
-
+    const filterCriteria: IUserFilterCriteria = req.body;
     const user = await userService.filter(filterCriteria);
     return res.status(StatusCode.Ok).json(user);
   } catch (error) {
