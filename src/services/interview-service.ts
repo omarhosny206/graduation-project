@@ -1,7 +1,6 @@
 import { Role } from '../enums/role-enum';
 import IInterview from '../interfaces/interviews/interview-interface';
 import InterviewModel from '../models/interview-model';
-import UserInfoModel from '../models/user-info-model';
 import * as userService from '../services/user-service';
 import ApiError from '../utils/api-error';
 
@@ -60,21 +59,11 @@ export async function save(interview: IInterview) {
     throw ApiError.badRequest('Cannot save interview, user info is required');
   }
 
-  const [savedInterviewPromise, interviewerInfoPromise, intervieweeInfoPromise] = [
-    InterviewModel.create(interview),
-    UserInfoModel.findById(interviewer.info),
-    UserInfoModel.findById(interviewee.info),
-  ];
+  const savedInterview = await InterviewModel.create(interview);
 
-  const [savedInterview, interviewerInfo, intervieweeInfo] = await Promise.all([
-    savedInterviewPromise,
-    interviewerInfoPromise,
-    intervieweeInfoPromise,
-  ]);
+  interviewer.info.interviewsMade.push(savedInterview._id);
+  interviewee.info.interviewsHad.push(savedInterview._id);
 
-  interviewerInfo?.interviewsMade.push(savedInterview._id);
-  intervieweeInfo?.interviewsHad.push(savedInterview._id);
-
-  await Promise.all([interviewerInfo?.save(), intervieweeInfo?.save()]);
+  await Promise.all([interviewer.save(), interviewee.save()]);
   return savedInterview;
 }

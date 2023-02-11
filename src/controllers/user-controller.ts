@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
+import { Types } from 'mongoose';
 
 import { StatusCode } from '../enums/status-code-enum';
 import ITimeslot from '../interfaces/users/timeslot-interface';
@@ -49,7 +50,7 @@ export async function update(req: Request, res: Response, next: NextFunction) {
   try {
     const userInfo: IUserInfo = req.body;
     const authenticatedUser = req.authenticatedUser;
-    await userService.update(authenticatedUser._id, userInfo);
+    await userService.update(authenticatedUser, userInfo);
     return res.status(StatusCode.Ok).json({ message: 'Updated successfully' });
   } catch (error) {
     return next(error);
@@ -88,12 +89,42 @@ export async function updateRole(req: Request, res: Response, next: NextFunction
   }
 }
 
-export async function hasOverlappingTimeslots(req: Request, res: Response, next: NextFunction) {
+export async function getById(req: Request, res: Response, next: NextFunction) {
   try {
-    const timeslots = req.body.timeslots as ITimeslot[];
+    const { _id } = req.params;
+    const user = await userService.getById(new Types.ObjectId(_id));
+    return res.status(StatusCode.Ok).json(user);
+  } catch (error) {
+    return next(error);
+  }
+}
+
+export async function deleteById(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { _id } = req.params;
+    await userService.deleteById(new Types.ObjectId(_id));
+    return res.status(StatusCode.Ok).json({ message: 'success' });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+export async function editTimeslots(req: Request, res: Response, next: NextFunction) {
+  try {
+    const timeslots = req.body.timeslots;
     const authenticatedUser = req.authenticatedUser;
-    const result = await userService.hasOverlappingTimeslots(authenticatedUser._id, timeslots);
-    return res.status(StatusCode.Ok).json(result);
+    await userService.editTimeslots(authenticatedUser, timeslots);
+    return res.status(StatusCode.Ok).json({ message: 'success' });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+export async function getInterviewsMade(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { username } = req.params;
+    const interviews = await userService.getInterviewsMade(username);
+    return res.status(StatusCode.Ok).json(interviews);
   } catch (error) {
     return next(error);
   }
