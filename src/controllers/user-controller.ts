@@ -119,3 +119,13 @@ export async function getInterviewsMade(req: Request, res: Response, next: NextF
     return next(error);
   }
 }
+
+export async function getInterviewsHad(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { username } = req.params;
+    const interviewsHad = await userService.getInterviewsHad(username);
+    return res.status(StatusCode.Ok).json(interviewsHad);
+  } catch (error) {
+    return next(error);
+  }
+}

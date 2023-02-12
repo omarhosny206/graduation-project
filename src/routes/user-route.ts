@@ -15,6 +15,7 @@ const router: Router = Router();
 router.get('/', userController.getAll);
 router.get('/filter', userController.filter);
 router.get('/interviews-made/:username', userController.getInterviewsMade);
+router.get('/interviews-had/:username', userController.getInterviewsHad);
 router.get('/:username', userController.getProfile);
 router.get('/:_id', authentication.authenticateByAccessToken, userController.getById);
 
