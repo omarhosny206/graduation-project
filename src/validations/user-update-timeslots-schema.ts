@@ -18,6 +18,8 @@ const userUpdateTimeslotsSchema: Joi.ObjectSchema<IUserInfo> = Joi.object<IUserI
           .required(),
       })
     )
+    .min(7)
+    .max(7)
     .unique('day')
     .required(),
 });
