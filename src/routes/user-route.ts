@@ -7,6 +7,7 @@ import * as authorization from '../middlewares/authorization';
 import * as validator from '../middlewares/validator';
 import userInfoSchema from '../validations/user-info-schema';
 import userUpdatePriceSchema from '../validations/user-update-price-schema ';
+import userUpdateTimeslotsSchema from '../validations/user-update-timeslots-schema ';
 import userUpdateUsernameSchema from '../validations/user-update-username-schema';
 
 const router: Router = Router();
@@ -41,6 +42,7 @@ router.put(
   '/timeslots',
   authentication.authenticateByAccessToken,
   authorization.authorizeByRole(Role.Interviewer),
+  validator.validate(userUpdateTimeslotsSchema),
   userController.editTimeslots
 );
 
