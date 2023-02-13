@@ -31,7 +31,7 @@ export async function getByEmail(email: string) {
 
 export async function getProfile(username: string) {
   try {
-    const user = await (await getByUserName(username))?.populate('info');
+    const user = await getByUserName(username);
 
     if (!user) {
       throw ApiError.badRequest('user not found');
@@ -43,21 +43,6 @@ export async function getProfile(username: string) {
   }
 }
 
-export async function getInfo(_id: Types.ObjectId) {
-  try {
-    const user = await (await getById(_id))?.populate('info');
-
-    if (!user) {
-      throw ApiError.badRequest('user not found');
-    }
-
-    return user.info;
-  } catch (error) {
-    throw ApiError.from(error);
-  }
-}
-
-// NOT IMPLEMENTED CORRECTLY
 export async function filter(filterCriteria: IUserFilterCriteria) {
   try {
     const users = await UserModel.find(filterCriteria);
@@ -82,48 +67,63 @@ export async function update(user: AuthenticatedUser, userInfo: IUserInfo) {
 }
 
 export async function updatePrice(user: AuthenticatedUser, price: number) {
-  if (!user.info) {
-    throw ApiError.badRequest('User info is required');
-  }
+  try {
+    if (!user.info) {
+      throw ApiError.badRequest('User info is required');
+    }
 
-  if (!isIllegibleForPricing(user.username)) {
-    throw ApiError.badRequest('Cannot update price, user is not illegible for pricing');
-  }
+    if (!isIllegibleForPricing(user.username)) {
+      throw ApiError.badRequest('Cannot update price, user is not illegible for pricing');
+    }
 
-  user.info.price = price;
-  const updatedUser = await user.save();
-  return updatedUser;
+    user.info.price = price;
+    const updatedUser = await user.save();
+    return updatedUser;
+  } catch (error) {
+    throw ApiError.from(error);
+  }
 }
 
 export async function updateUsername(user: AuthenticatedUser, username: string) {
-  if (user.username === username) {
-    return user;
+  try {
+    if (user.username === username) {
+      return user;
+    }
+
+    const userWithUsername = await getByUserName(username);
+    if (userWithUsername) {
+      throw ApiError.badRequest('Cannot update username, it is already used');
+    }
+
+    user.username = username;
+    const updatedUser = await user.save();
+    return updatedUser;
+  } catch (error) {
+    throw ApiError.from(error);
   }
-
-  const userWithUsername = await getByUserName(username);
-
-  if (userWithUsername) {
-    throw ApiError.badRequest('Cannot update username, it is already used');
-  }
-
-  user.username = username;
-  const updatedUser = await user.save();
-  return updatedUser;
 }
 
 export async function updateRole(user: AuthenticatedUser) {
-  if (user.role === Role.Interviewer) {
-    throw ApiError.badRequest('Interviewer cannot update role');
-  }
+  try {
+    if (user.role === Role.Interviewer) {
+      throw ApiError.badRequest('Interviewer cannot update role');
+    }
 
-  user.role = Role.Interviewer;
-  const updatedUser = await user.save();
-  return updatedUser;
+    user.role = Role.Interviewer;
+    const updatedUser = await user.save();
+    return updatedUser;
+  } catch (error) {
+    throw ApiError.from(error);
+  }
 }
 
 export async function getInterviewsHad(username: string) {
-  const interviewsHad = await interviewService.getInterviewsHad(username);
-  return interviewsHad;
+  try {
+    const interviewsHad = await interviewService.getInterviewsHad(username);
+    return interviewsHad;
+  } catch (error) {
+    throw ApiError.from(error);
+  }
 }
 
 export async function getById(_id: Types.ObjectId) {
@@ -163,13 +163,14 @@ export async function deleteById(_id: Types.ObjectId) {
 
 export async function editTimeslots(user: AuthenticatedUser, timeslots: ITimeslot[]) {
   try {
-    console.log(user);
     if (!user.info) {
       throw ApiError.badRequest('user info is required.');
     }
+
     if (hasOverlappingTimeslots(timeslots)) {
       throw ApiError.badRequest('timeslots has overlapping.');
     }
+
     user.info.timeslots = timeslots;
     await user.save();
   } catch (error) {
@@ -213,6 +214,7 @@ export async function isIllegibleForPricing(username: string) {
     if (avgRating! >= 3) {
       return true;
     }
+
     return false;
   } catch (error) {
     throw ApiError.from(error);

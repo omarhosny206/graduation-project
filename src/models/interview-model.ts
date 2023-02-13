@@ -29,6 +29,7 @@ const interviewSchema = new Schema<IInterview>(
         },
       },
       required: false,
+      _id: false,
     },
     isFinished: { type: Boolean, required: true, default: false },
     price: { type: Number, required: true, min: 5 },
