@@ -17,7 +17,14 @@ router.post(
   authentication.authenticateByAccessToken,
   authorization.authorizeByRole(Role.Interviewee, Role.Interviewer),
   validator.validate(interviewSchema),
-  interviewController.save
+  interviewController.book
+);
+router.get('/:_id', interviewController.getById);
+router.get(
+  '/confirm/:_id',
+  authentication.authenticateByAccessToken,
+  authorization.authorizeByRole(Role.Interviewee),
+  interviewController.confirm
 );
 
 export default router;

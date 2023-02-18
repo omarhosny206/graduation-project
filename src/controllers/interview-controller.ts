@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
+import { Types } from 'mongoose';
 
 import { StatusCode } from '../enums/status-code-enum';
 import IInterview from '../interfaces/interviews/interview-interface';
@@ -33,12 +34,32 @@ export async function getInterviewsMade(req: Request, res: Response, next: NextF
   }
 }
 
-export async function save(req: Request, res: Response, next: NextFunction) {
+export async function book(req: Request, res: Response, next: NextFunction) {
   try {
     const interview: IInterview = req.body;
-    const savedInterview: IInterview = await interviewService.save(interview);
+    const savedInterview: IInterview = await interviewService.book(interview);
     return res.status(StatusCode.Created).json(savedInterview);
   } catch (error) {
     return next(error);
+  }
+}
+
+export async function getById(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { _id } = req.params;
+    const interview = await interviewService.getById(new Types.ObjectId(_id));
+    return res.status(StatusCode.Ok).json(interview);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function confirm(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { _id } = req.params;
+    const intervieweeId = req.authenticatedUser._id;
+    await interviewService.confirm(new Types.ObjectId(_id), intervieweeId);
+  } catch (error) {
+    next(error);
   }
 }

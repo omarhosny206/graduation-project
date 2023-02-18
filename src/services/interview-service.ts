@@ -1,3 +1,5 @@
+import { Types } from 'mongoose';
+import { InterviewStatus } from '../enums/interview-status-enum';
 import { Role } from '../enums/role-enum';
 import IInterview from '../interfaces/interviews/interview-interface';
 import InterviewModel from '../models/interview-model';
@@ -47,7 +49,16 @@ export async function getInterviewsMade(username: string) {
   }
 }
 
-export async function save(interview: IInterview) {
+export async function getById(_id: Types.ObjectId) {
+  try {
+    const interview = await InterviewModel.findById(_id);
+    return interview;
+  } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
+export async function book(interview: IInterview) {
   try {
     const [interviewerPromise, intervieweePromise] = [
       userService.getById(interview.interviewer),
@@ -75,6 +86,25 @@ export async function save(interview: IInterview) {
 
     await Promise.all([interviewer.save(), interviewee.save()]);
     return savedInterview;
+  } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
+export async function confirm(_id: Types.ObjectId, userId: Types.ObjectId) {
+  try {
+    const interview = await getById(_id);
+    if (!interview) {
+      throw ApiError.badRequest('Interview not found');
+    }
+    if (!interview.interviewer.equals(userId)) {
+      throw ApiError.badRequest('You cannot confirm this interview');
+    }
+    if (interview.isFinished || interview.status !== InterviewStatus.Pending) {
+      throw ApiError.badRequest('Interview is either finished or in processing stage.');
+    }
+    interview.status = InterviewStatus.Confirmed;
+    await interview.save();
   } catch (error) {
     throw ApiError.from(error);
   }
