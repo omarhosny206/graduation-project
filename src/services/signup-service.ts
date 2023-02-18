@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt';
 import { generateFromEmail } from 'unique-username-generator';
 
 import IUser from '../interfaces/users/user-interface';
+import * as emailService from '../services/email-service';
 import * as userService from '../services/user-service';
 import ApiError from '../utils/api-error';
 
@@ -19,7 +20,6 @@ export async function signup(user: IUser): Promise<IUser> {
 
     while (true) {
       user.username = generateFromEmail(user.email, 3);
-      console.log(user.username);
 
       const userWithSameUsername = await userService.getByUserName(user.username);
       if (!userWithSameUsername) {
@@ -27,8 +27,8 @@ export async function signup(user: IUser): Promise<IUser> {
       }
     }
 
+    await emailService.sendEmailConfirmation(email);
     const savedUser = await userService.save(user);
-
     return savedUser;
   } catch (error) {
     throw ApiError.from(error);
@@ -51,7 +51,6 @@ export async function signupByProviders(user: IUser): Promise<IUser> {
 
     while (true) {
       user.username = generateFromEmail(user.email, 3);
-      console.log(user.username);
 
       const userWithSameUsername = await userService.getByUserName(user.username);
       if (!userWithSameUsername) {
@@ -59,8 +58,8 @@ export async function signupByProviders(user: IUser): Promise<IUser> {
       }
     }
 
+    user.confirmed = true;
     const savedUser = await userService.save(user);
-
     return savedUser;
   } catch (error) {
     throw ApiError.from(error);

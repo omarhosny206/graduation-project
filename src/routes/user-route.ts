@@ -9,6 +9,9 @@ import userInfoSchema from '../validations/user-info-schema';
 import userUpdatePriceSchema from '../validations/user-update-price-schema';
 import userUpdateTimeslotsSchema from '../validations/user-update-timeslots-schema';
 import userUpdateUsernameSchema from '../validations/user-update-username-schema';
+import userUpdatePasswordSchema from '../validations/user-update-password-schema';
+import userResetPasswordSchema from '../validations/user-reset-password-schema';
+import userForgotPasswordSchema from '../validations/user-forgot-password-schema';
 
 const router: Router = Router();
 
@@ -18,6 +21,14 @@ router.get('/interviews-made/:username', userController.getInterviewsMade);
 router.get('/interviews-had/:username', userController.getInterviewsHad);
 router.get('/:username', userController.getProfile);
 router.get('/:_id', authentication.authenticateByAccessToken, userController.getById);
+
+router.post('/email/confirmation/:emailConfirmationToken', userController.confirmEmail);
+router.post('/forgot-password', validator.validate(userForgotPasswordSchema), userController.forgotPassword);
+router.post(
+  '/reset-password/:resetPasswordToken',
+  validator.validate(userResetPasswordSchema),
+  userController.resetPassword
+);
 
 router.put('/', authentication.authenticateByAccessToken, validator.validate(userInfoSchema), userController.update);
 router.put(
@@ -45,6 +56,12 @@ router.put(
   authorization.authorizeByRole(Role.Interviewer),
   validator.validate(userUpdateTimeslotsSchema),
   userController.editTimeslots
+);
+router.put(
+  '/password',
+  authentication.authenticateByAccessToken,
+  validator.validate(userUpdatePasswordSchema),
+  userController.updatePassword
 );
 
 router.delete(
