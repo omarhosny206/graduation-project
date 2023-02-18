@@ -1,14 +1,19 @@
+import bcrypt from 'bcrypt';
 import { Types } from 'mongoose';
 
 import { Role } from '../enums/role-enum';
+import IPasswordReset from '../interfaces/users/password-reset-interface';
+import IPasswordUpdate from '../interfaces/users/password-update-interface';
 import ITimeslot from '../interfaces/users/timeslot-interface';
 import IUserFilterCriteria from '../interfaces/users/user-filter-criteria-interface';
 import IUserInfo from '../interfaces/users/user-info-interface';
 import IUser from '../interfaces/users/user-interface';
 import UserModel from '../models/user-model';
+import * as emailService from '../services/email-service';
 import * as interviewService from '../services/interview-service';
 import ApiError from '../utils/api-error';
 import { AuthenticatedUser } from '../utils/authenticated-user-type';
+import * as jwt from '../utils/jwt';
 import { hasOverlappingTimeslots } from '../utils/time-slots';
 
 export async function getAll() {
@@ -60,7 +65,8 @@ export async function update(user: AuthenticatedUser, userInfo: IUserInfo) {
       user.info = userInfo;
     }
 
-    await user.save();
+    const updatedUser = await user.save();
+    return updatedUser;
   } catch (error) {
     throw ApiError.from(error);
   }
@@ -72,11 +78,12 @@ export async function updatePrice(user: AuthenticatedUser, price: number) {
       throw ApiError.badRequest('User info is required');
     }
 
-    if (!isIllegibleForPricing(user.username)) {
+    if (!isIllegibleForPricing(user)) {
       throw ApiError.badRequest('Cannot update price, user is not illegible for pricing');
     }
 
     user.info.price = price;
+    user.info.priceable = true;
     const updatedUser = await user.save();
     return updatedUser;
   } catch (error) {
@@ -110,6 +117,79 @@ export async function updateRole(user: AuthenticatedUser) {
     }
 
     user.role = Role.Interviewer;
+    const updatedUser = await user.save();
+    return updatedUser;
+  } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
+export async function confirmEmail(emailConfirmationToken: string) {
+  try {
+    const payload = await jwt.verifyEmailConfirmationToken(emailConfirmationToken);
+    const user = await getByEmail(payload.email);
+
+    if (!user) {
+      throw ApiError.unauthorized('Unauthorized: user not found');
+    }
+
+    user.confirmed = true;
+    await user.save();
+  } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
+export async function updatePassword(passwordUpdate: IPasswordUpdate, user: AuthenticatedUser) {
+  try {
+    const isOldPasswordCorrect = await bcrypt.compare(passwordUpdate.oldPassword, user.password);
+
+    if (!isOldPasswordCorrect) {
+      throw ApiError.badRequest('Old password is incorrect');
+    }
+
+    if (passwordUpdate.newPassword !== passwordUpdate.confirmPassword) {
+      throw ApiError.badRequest('New password & Confirm password should be equal');
+    }
+
+    user.password = await bcrypt.hash(passwordUpdate.newPassword, 10);
+
+    const updatedUser = await user.save();
+    return updatedUser;
+  } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
+export async function forgotPassword(email: string) {
+  try {
+    const user = await getByEmail(email);
+
+    if (!user) {
+      throw ApiError.badRequest('user not found');
+    }
+
+    await emailService.sendResetPassword(email);
+  } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
+export async function resetPassword(resetPasswordToken: string, passwordReset: IPasswordReset) {
+  try {
+    const payload = await jwt.verifyResetPasswordToken(resetPasswordToken);
+    const user = await getByEmail(payload.email);
+
+    if (!user) {
+      throw ApiError.badRequest('user not found');
+    }
+
+    if (passwordReset.newPassword !== passwordReset.confirmPassword) {
+      throw ApiError.badRequest('New password & Confirm password should be equal');
+    }
+
+    user.password = await bcrypt.hash(passwordReset.newPassword, 10);
+
     const updatedUser = await user.save();
     return updatedUser;
   } catch (error) {
@@ -186,23 +266,25 @@ export async function getInterviewsMade(username: string) {
   }
 }
 
-export async function isIllegibleForPricing(username: string) {
+export async function isIllegibleForPricing(user: AuthenticatedUser) {
   try {
-    const userId = (await getByUserName(username))?._id;
-    const interviewsMade = await getInterviewsMade(username);
+    if (user.info?.priceable) {
+      return true;
+    }
 
-    const interviewerRating = interviewsMade
-      .filter((interview) => interview.info && interview.info.reviews)
-      .map((interview) => {
-        for (const review of interview.info?.reviews!) {
-          if (review.to.toString() === userId?.toString()) {
-            return review.rating;
-          }
+    const interviewsMade = await getInterviewsMade(user.username);
+    const interviewsWithReviews = interviewsMade.filter((interview) => interview.info && interview.info.reviews);
+
+    const interviewerRating = interviewsWithReviews.map((interview) => {
+      for (const review of interview.info?.reviews!) {
+        if (user._id.equals(review.to)) {
+          return review.rating;
         }
-      });
+      }
+    });
 
-    if (interviewerRating.length === 0) {
-      return false;
+    if (interviewerRating.length < 3) {
+      throw ApiError.badRequest('Not illegible, you must have at least 3 finished interviews with ratings');
     }
 
     const ratingSum = interviewerRating.reduce((accumulator, currentVal) => {
@@ -211,11 +293,13 @@ export async function isIllegibleForPricing(username: string) {
 
     const avgRating = ratingSum! / interviewerRating.length;
 
-    if (avgRating! >= 3) {
-      return true;
+    console.log(avgRating);
+
+    if (avgRating < 3) {
+      return false;
     }
 
-    return false;
+    return true;
   } catch (error) {
     throw ApiError.from(error);
   }

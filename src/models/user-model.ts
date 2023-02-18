@@ -8,6 +8,8 @@ const userSchema = new Schema<IUser>(
     email: { type: String, required: true, unique: true },
     username: { type: String, required: true, unique: true },
     password: { type: String, minlength: 8, required: true },
+    confirmed: { type: Boolean, required: false, default: false },
+    active: { type: Boolean, required: false, default: true },
     role: { type: String, required: true, enum: ALL_ROLES },
     info: {
       type: {

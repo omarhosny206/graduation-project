@@ -9,7 +9,7 @@ import * as jwt from '../utils/jwt';
 export async function signin(loginRequest: ISigninRequest): Promise<ISigninResponse> {
   try {
     const { email, password } = loginRequest;
-    const storedUser = await userService.getByEmail(email);
+    let storedUser = await userService.getByEmail(email);
 
     if (!storedUser) {
       throw ApiError.unauthorized('Bad Credentials: Invalid email');
@@ -20,6 +20,15 @@ export async function signin(loginRequest: ISigninRequest): Promise<ISigninRespo
 
     if (!areEqualPasswords) {
       throw ApiError.unauthorized('Bad Credentials: Invalid password');
+    }
+
+    if (!storedUser.confirmed) {
+      throw ApiError.unauthorized('Email confirmation is required');
+    }
+
+    if (!storedUser.active) {
+      storedUser.active = true;
+      storedUser = await storedUser.save();
     }
 
     const accessToken = await jwt.generateAccessToken(email);
