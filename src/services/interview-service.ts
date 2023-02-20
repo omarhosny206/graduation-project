@@ -148,8 +148,7 @@ export async function updateReview(_id: Types.ObjectId, user: AuthenticatedUser,
   }
 }
 
-
-export async function book(interview: IInterview) {
+export async function book(interview: IInterview, user: AuthenticatedUser) {
   try {
     const [interviewerPromise, intervieweePromise] = [
       userService.getById(interview.interviewer),
@@ -168,6 +167,10 @@ export async function book(interview: IInterview) {
 
     if (!interviewer.info || !interviewee.info) {
       throw ApiError.badRequest('Cannot save interview, user info is required');
+    }
+
+    if (!user._id.equals(interview.interviewer) && !user._id.equals(interview.interviewee)) {
+      throw ApiError.badRequest('Cannot save interview, you are not a member in this interview');
     }
 
     const savedInterview = await InterviewModel.create(interview);
@@ -210,13 +213,13 @@ export async function reject(_id: Types.ObjectId, user: AuthenticatedUser) {
   }
 }
 
-export async function confirm(_id: Types.ObjectId, userId: Types.ObjectId) {
+export async function confirm(_id: Types.ObjectId, user: AuthenticatedUser) {
   try {
     const interview = await getById(_id);
     if (!interview) {
       throw ApiError.badRequest('Interview not found');
     }
-    if (!interview.interviewer.equals(userId)) {
+    if (!interview.interviewer.equals(user._id)) {
       throw ApiError.badRequest('You cannot confirm this interview');
     }
     if (interview.isFinished || interview.status !== InterviewStatus.Pending) {

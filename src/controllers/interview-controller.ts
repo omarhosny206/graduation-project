@@ -53,7 +53,7 @@ export async function book(req: Request, res: Response, next: NextFunction) {
     interview.interviewer = new mongoose.Types.ObjectId(interview.interviewer);
     interview.interviewee = new mongoose.Types.ObjectId(interview.interviewee);
     const authenticatedUser = req.authenticatedUser;
-    const savedInterview: IInterview = await interviewService.book(interview);
+    const savedInterview: IInterview = await interviewService.book(interview, authenticatedUser);
     return res.status(StatusCode.Created).json(savedInterview);
   } catch (error) {
     return next(error);
@@ -63,7 +63,7 @@ export async function book(req: Request, res: Response, next: NextFunction) {
 export async function getById(req: Request, res: Response, next: NextFunction) {
   try {
     const { _id } = req.params;
-    const interview = await interviewService.getById(new Types.ObjectId(_id));
+    const interview = await interviewService.getById(new mongoose.Types.ObjectId(_id));
     return res.status(StatusCode.Ok).json(interview);
   } catch (error) {
     next(error);
@@ -73,11 +73,12 @@ export async function getById(req: Request, res: Response, next: NextFunction) {
 export async function confirm(req: Request, res: Response, next: NextFunction) {
   try {
     const { _id } = req.params;
-    const intervieweeId = req.authenticatedUser._id;
-    await interviewService.confirm(new Types.ObjectId(_id), intervieweeId);
+    const authenticatedUser = req.authenticatedUser;
+    await interviewService.confirm(new mongoose.Types.ObjectId(_id), authenticatedUser);
   } catch (error) {
     next(error);
-
+  }
+}
 export async function update(req: Request, res: Response, next: NextFunction) {
   try {
     const _id = new mongoose.Types.ObjectId(req.params._id);
