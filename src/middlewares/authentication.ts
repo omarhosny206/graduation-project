@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { JwtPayload } from 'jsonwebtoken';
 
-import IUser from '../interfaces/users/user-interface';
 import * as userService from '../services/user-service';
 import ApiError from '../utils/api-error';
 import * as jwt from '../utils/jwt';
@@ -17,7 +16,7 @@ export async function authenticateByAccessToken(req: Request, res: Response, nex
     const accessToken: string = authorizationHeader.slice(7);
     const payload: JwtPayload = await jwt.verifyAccessToken(accessToken);
 
-    const user = await userService.getByEmail(payload.email);
+    const user = await userService.getByEmailOrDefault(payload.email, null);
 
     if (!user) {
       throw ApiError.unauthorized('Unauthorized: user not found');

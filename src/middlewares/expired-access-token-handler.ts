@@ -1,8 +1,8 @@
-import IUser from '../interfaces/users/user-interface';
 import { NextFunction, Request, Response } from 'express';
 import { JwtPayload } from 'jsonwebtoken';
 
 import { StatusCode } from '../enums/status-code-enum';
+import IUser from '../interfaces/users/user-interface';
 import * as userService from '../services/user-service';
 import ApiError from '../utils/api-error';
 import * as jwt from '../utils/jwt';
@@ -16,7 +16,7 @@ export async function regenerateTokens(req: Request, res: Response, next: NextFu
     }
 
     const payload: JwtPayload = await jwt.verifyRefreshToken(refreshToken);
-    const user: IUser | null = await userService.getByEmail(payload.email);
+    const user = await userService.getByEmailOrDefault(payload.email, null);
 
     if (!user) {
       throw ApiError.unauthorized('Unauthorized: user not found');

@@ -9,7 +9,7 @@ import * as jwt from '../utils/jwt';
 export async function signin(loginRequest: ISigninRequest): Promise<ISigninResponse> {
   try {
     const { email, password } = loginRequest;
-    let storedUser = await userService.getByEmail(email);
+    let storedUser = await userService.getByEmailOrDefault(email, null);
 
     if (!storedUser) {
       throw ApiError.unauthorized('Bad Credentials: Invalid email');

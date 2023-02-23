@@ -28,6 +28,11 @@ export async function getAll() {
 export async function getByEmail(email: string) {
   try {
     const user = await UserModel.findOne({ email: email });
+
+    if (!user) {
+      throw ApiError.badRequest('user not found with this email');
+    }
+
     return user;
   } catch (error) {
     throw ApiError.from(error);
@@ -37,11 +42,6 @@ export async function getByEmail(email: string) {
 export async function getProfile(username: string) {
   try {
     const user = await getByUserName(username);
-
-    if (!user) {
-      throw ApiError.badRequest('user not found');
-    }
-
     return user;
   } catch (error) {
     throw ApiError.from(error);
@@ -97,9 +97,9 @@ export async function updateUsername(user: AuthenticatedUser, username: string) 
       return user;
     }
 
-    const userWithUsername = await getByUserName(username);
-    if (userWithUsername) {
-      throw ApiError.badRequest('Cannot update username, it is already used');
+    const alreadyExistsByUsername = await existsByUsername(username);
+    if (alreadyExistsByUsername) {
+      throw ApiError.badRequest('username is already used');
     }
 
     user.username = username;
@@ -128,11 +128,6 @@ export async function confirmEmail(emailConfirmationToken: string) {
   try {
     const payload = await jwt.verifyEmailConfirmationToken(emailConfirmationToken);
     const user = await getByEmail(payload.email);
-
-    if (!user) {
-      throw ApiError.unauthorized('Unauthorized: user not found');
-    }
-
     user.confirmed = true;
     await user.save();
   } catch (error) {
@@ -164,11 +159,6 @@ export async function updatePassword(passwordUpdate: IPasswordUpdate, user: Auth
 export async function forgotPassword(email: string) {
   try {
     const user = await getByEmail(email);
-
-    if (!user) {
-      throw ApiError.badRequest('user not found');
-    }
-
     await emailService.sendResetPassword(email);
   } catch (error) {
     throw ApiError.from(error);
@@ -179,10 +169,6 @@ export async function resetPassword(resetPasswordToken: string, passwordReset: I
   try {
     const payload = await jwt.verifyResetPasswordToken(resetPasswordToken);
     const user = await getByEmail(payload.email);
-
-    if (!user) {
-      throw ApiError.badRequest('user not found');
-    }
 
     if (passwordReset.newPassword !== passwordReset.confirmPassword) {
       throw ApiError.badRequest('New password & Confirm password should be equal');
@@ -209,6 +195,11 @@ export async function getInterviewsHad(username: string) {
 export async function getById(_id: Types.ObjectId) {
   try {
     const user = await UserModel.findById(_id);
+
+    if (!user) {
+      throw ApiError.badRequest('user not found with this id');
+    }
+
     return user;
   } catch (error) {
     throw ApiError.from(error);
@@ -218,6 +209,11 @@ export async function getById(_id: Types.ObjectId) {
 export async function getByUserName(username: string) {
   try {
     const user = await UserModel.findOne({ username: username });
+
+    if (!user) {
+      throw ApiError.badRequest('user not found with this username');
+    }
+
     return user;
   } catch (error) {
     throw ApiError.from(error);
@@ -313,7 +309,7 @@ export async function checkEmailUpdate(email: string) {
       throw ApiError.badRequest('This email is already taken.');
     }
     await emailService.sendEmailUpdate(email);
-  } catch (error) {
+    } catch (error) {
     throw ApiError.from(error);
   }
 }
@@ -324,6 +320,34 @@ export async function updateEmail(emailUpdateToken: string, user: AuthenticatedU
     user.email = email;
     const updatedUser = await user.save();
     return updatedUser;
+    } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
+export async function getByEmailOrDefault(email: string, defaultValue: null = null) {
+  try {
+    const user = await UserModel.findOne({ email: email });
+
+    if (!user) {
+      return defaultValue;
+    }
+
+    return user;
+} catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
+export async function existsByUsername(username: string) {
+  try {
+    const user = await UserModel.findOne({ username: username });
+
+    if (!user) {
+      return false;
+    }
+
+    return true;
   } catch (error) {
     throw ApiError.from(error);
   }

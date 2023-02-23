@@ -9,7 +9,7 @@ import ApiError from '../utils/api-error';
 export async function signup(user: IUser): Promise<IUser> {
   try {
     const { email, password } = user;
-    const storedUser = await userService.getByEmail(email);
+    const storedUser = await userService.getByEmailOrDefault(email, null);
 
     if (storedUser) {
       throw ApiError.badRequest('This email is already taken, choose another one');
@@ -21,8 +21,8 @@ export async function signup(user: IUser): Promise<IUser> {
     while (true) {
       user.username = generateFromEmail(user.email, 3);
 
-      const userWithSameUsername = await userService.getByUserName(user.username);
-      if (!userWithSameUsername) {
+      const alreadyExistsByUsername = await userService.existsByUsername(user.username);
+      if (!alreadyExistsByUsername) {
         break;
       }
     }
@@ -38,7 +38,7 @@ export async function signup(user: IUser): Promise<IUser> {
 export async function signupByProviders(user: IUser): Promise<IUser> {
   try {
     const { email } = user;
-    const storedUser = await userService.getByEmail(email);
+    const storedUser = await userService.getByEmailOrDefault(email, null);
 
     if (storedUser) {
       throw ApiError.badRequest('This email is already taken, choose another one');
@@ -52,8 +52,8 @@ export async function signupByProviders(user: IUser): Promise<IUser> {
     while (true) {
       user.username = generateFromEmail(user.email, 3);
 
-      const userWithSameUsername = await userService.getByUserName(user.username);
-      if (!userWithSameUsername) {
+      const alreadyExistsByUsername = await userService.existsByUsername(user.username);
+      if (!alreadyExistsByUsername) {
         break;
       }
     }

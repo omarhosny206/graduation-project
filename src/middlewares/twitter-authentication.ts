@@ -43,7 +43,7 @@ export async function authenticateByAccessToken(req: any, res: any, next: any): 
     lastName = lastName.join(' ');
     const email: string = data.screen_name;
 
-    const user: IUser | null = await userService.getByEmail(email);
+    const user = await userService.getByEmailOrDefault(email, null);
 
     if (!user) {
       return res.status(StatusCode.Ok).json({ firstName: firstName, lastName: lastName, email: email });
