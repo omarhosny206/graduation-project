@@ -301,6 +301,30 @@ export async function isIllegibleForPricing(user: AuthenticatedUser) {
   }
 }
 
+export async function checkEmailUpdate(email: string) {
+  try {
+    const user = await UserModel.findOne({ email: email });
+    console.log(user);
+    if (user) {
+      throw ApiError.badRequest('This email is already taken.');
+    }
+    await emailService.sendEmailUpdate(email);
+    } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
+export async function updateEmail(emailUpdateToken: string, user: AuthenticatedUser) {
+  try {
+    const { email } = await jwt.verifyEmailUpdatingToken(emailUpdateToken);
+    user.email = email;
+    const updatedUser = await user.save();
+    return updatedUser;
+    } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
 export async function getByEmailOrDefault(email: string, defaultValue: null = null) {
   try {
     const user = await UserModel.findOne({ email: email });
@@ -310,7 +334,7 @@ export async function getByEmailOrDefault(email: string, defaultValue: null = nu
     }
 
     return user;
-  } catch (error) {
+} catch (error) {
     throw ApiError.from(error);
   }
 }

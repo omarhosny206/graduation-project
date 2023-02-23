@@ -173,3 +173,24 @@ export async function getInterviewsHad(req: Request, res: Response, next: NextFu
     return next(error);
   }
 }
+
+export async function requestEmailUpdate(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { email } = req.body;
+    await userService.checkEmailUpdate(email);
+    return res.status(StatusCode.Ok).json({ message: 'Email sent to update email' });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function updateEmail(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { emailUpdateToken } = req.params;
+    const authenticatedUser = req.authenticatedUser;
+    const updatedUser = await userService.updateEmail(emailUpdateToken, authenticatedUser);
+    return res.status(StatusCode.Ok).json(updatedUser);
+  } catch (error) {
+    next(error);
+  }
+}
