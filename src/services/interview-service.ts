@@ -23,11 +23,6 @@ export async function getAll() {
 export async function getInterviewsHad(username: string) {
   try {
     const user = await userService.getByUserName(username);
-
-    if (!user) {
-      throw ApiError.badRequest('Cannot get interviews had, user not found');
-    }
-
     const interviewsHad = await InterviewModel.find({ interviewee: user._id });
     return interviewsHad;
   } catch (error) {
@@ -38,15 +33,9 @@ export async function getInterviewsHad(username: string) {
 export async function getInterviewsMade(username: string) {
   try {
     const user = await userService.getByUserName(username);
-
-    if (!user) {
-      throw ApiError.badRequest('Cannot get interviews made, user not found');
-    }
-
     if (user.role === Role.Interviewee) {
       throw ApiError.badRequest('Cannot get interviews made, interviewee role is not allowed to make interviews');
     }
-
     const interviewsHad = await InterviewModel.find({ interviewer: user._id });
     return interviewsHad;
   } catch (error) {
@@ -57,6 +46,11 @@ export async function getInterviewsMade(username: string) {
 export async function getById(_id: Types.ObjectId) {
   try {
     const interview = await InterviewModel.findById(_id);
+
+    if (!interview) {
+      throw ApiError.badRequest('interview not found with this id');
+    }
+
     return interview;
   } catch (error) {
     throw ApiError.from(error);
@@ -75,10 +69,6 @@ export async function filter(filterCriteria: IInterviewFilterCriteria) {
 export async function update(_id: Types.ObjectId, user: AuthenticatedUser, interviewInfo: IInterviewInfo) {
   try {
     const interview = await getById(_id);
-
-    if (!interview) {
-      throw ApiError.badRequest('Cannot update info, interview not found');
-    }
 
     if (!user._id.equals(interview.interviewer) && !user._id.equals(interview.interviewee)) {
       throw ApiError.badRequest('Cannot update info, you are not a member in this interview');
@@ -104,10 +94,6 @@ export async function update(_id: Types.ObjectId, user: AuthenticatedUser, inter
 export async function updateReview(_id: Types.ObjectId, user: AuthenticatedUser, review: IReview) {
   try {
     const interview = await getById(_id);
-
-    if (!interview) {
-      throw ApiError.badRequest('Cannot update reviews, interview not found');
-    }
 
     if (!user._id.equals(review.from)) {
       throw ApiError.badRequest('Cannot update reviews, you are not the author of this review');
@@ -157,10 +143,6 @@ export async function book(interview: IInterview, user: AuthenticatedUser) {
 
     const [interviewer, interviewee] = await Promise.all([interviewerPromise, intervieweePromise]);
 
-    if (!interviewer || !interviewee) {
-      throw ApiError.badRequest('Cannot save interview, user not found');
-    }
-
     if (interviewer.role !== Role.Interviewer) {
       throw ApiError.badRequest('Cannot save interview, interviewee cannot make interviews');
     }
@@ -189,10 +171,6 @@ export async function reject(_id: Types.ObjectId, user: AuthenticatedUser) {
   try {
     const interview = await getById(_id);
 
-    if (!interview) {
-      throw ApiError.badRequest('Cannot reject interview, interview not found');
-    }
-
     if (interview.status === InterviewStatus.Rejected) {
       return interview;
     }
@@ -216,15 +194,15 @@ export async function reject(_id: Types.ObjectId, user: AuthenticatedUser) {
 export async function confirm(_id: Types.ObjectId, user: AuthenticatedUser) {
   try {
     const interview = await getById(_id);
-    if (!interview) {
-      throw ApiError.badRequest('Interview not found');
-    }
+
     if (!interview.interviewer.equals(user._id)) {
       throw ApiError.badRequest('You cannot confirm this interview');
     }
+
     if (interview.isFinished || interview.status !== InterviewStatus.Pending) {
       throw ApiError.badRequest('Interview is either finished or in processing stage.');
     }
+    
     interview.status = InterviewStatus.Confirmed;
     await interview.save();
   } catch (error) {
