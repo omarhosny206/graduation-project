@@ -71,4 +71,7 @@ router.delete(
   userController.deleteById
 );
 
+router.put('/update-email', authentication.authenticateByAccessToken, userController.requestEmailUpdate);
+router.put('/update-email/:emailUpdateToken', authentication.authenticateByAccessToken, userController.updateEmail);
+
 export default router;
