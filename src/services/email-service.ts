@@ -22,7 +22,7 @@ export async function sendEmailConfirmation(email: string) {
   try {
     const emailConfirmationToken = await jwt.generateEmailConfirmationToken(email);
     const subject = '[Pass] Please confirm your email address';
-    const body = `<b>Click this <a href=${EMAIL_CONFIRMATION_ENDPOINT}/${emailConfirmationToken}> link </a></b>`;
+    const body = `<b>Click this <a href=http://localhost:3000/users/email/confirmation/${emailConfirmationToken}> link </a></b>`;
 
     const mailOptions: Mail.Options = {
       from: GMAIL_USER,
