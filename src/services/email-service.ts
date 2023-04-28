@@ -1,6 +1,7 @@
 import nodemailer from 'nodemailer';
 import Mail from 'nodemailer/lib/mailer';
 
+import * as videoMeetingService from '../services/video-meeting-service';
 import ApiError from '../utils/api-error';
 import * as jwt from '../utils/jwt';
 
@@ -42,7 +43,6 @@ export async function sendEmailUpdate(email: string) {
     const emailUpdateToken = await jwt.generateEmailUpdatingToken(email);
     const subject = '[Pass] Request for email update';
     const body = `<b>Click this <a href=${EMAIL_UPDATE_ENDPOINT}/${emailUpdateToken}> link </a></b>`;
-    console.log(EMAIL_UPDATE_ENDPOINT)
 
     const mailOptions: Mail.Options = {
       from: GMAIL_USER,
@@ -71,6 +71,71 @@ export async function sendResetPassword(email: string) {
     };
 
     await transporter.sendMail(mailOptions);
+  } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
+export async function getEmailConfirmationMailOptions(email: string) {
+  try {
+    const emailConfirmationToken = await jwt.generateEmailConfirmationToken(email);
+    const subject = '[Pass] Please confirm your email address';
+    const body = `<b>Click this <a href=${EMAIL_CONFIRMATION_ENDPOINT}/${emailConfirmationToken}> link </a></b>`;
+
+    return { from: GMAIL_USER, to: email, html: body, subject: subject };
+  } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
+export async function getVideoMeetingMailOptions(interviewerEmail: string, intervieweeEmail: string) {
+  try {
+    const meeting = await videoMeetingService.create();
+    const subject = '[Pass] Interview Video Meeting';
+    const body = `<p>Interviewer: ${interviewerEmail}</p> <p>Interviewee: ${intervieweeEmail}</p> <b><a href=${meeting.join_url}> Meeting URL </a></b>`;
+
+    const interviewerMailOptions = { from: GMAIL_USER, to: interviewerEmail, html: body, subject: subject };
+    const intervieweeMailOptions = { from: GMAIL_USER, to: intervieweeEmail, html: body, subject: subject };
+    return [interviewerMailOptions, intervieweeMailOptions];
+  } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
+export async function getEmailUpdateMailOptions(email: string) {
+  try {
+    const emailUpdateToken = await jwt.generateEmailUpdatingToken(email);
+    const subject = '[Pass] Request for email update';
+    const body = `<b>Click this <a href=${EMAIL_UPDATE_ENDPOINT}/${emailUpdateToken}> link </a></b>`;
+    console.log(EMAIL_UPDATE_ENDPOINT);
+
+    const mailOptions: Mail.Options = {
+      from: GMAIL_USER,
+      to: email,
+      subject: subject,
+      html: body,
+    };
+
+    return mailOptions;
+  } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
+export async function getResetPasswordMailOptions(email: string) {
+  try {
+    const resetPasswordToken = await jwt.generateResetPasswordToken(email);
+    const subject = '[Pass] Please reset your password';
+    const body = `<b>Click this <a href=${RESET_PASSWORD_ENDPOINT}/${resetPasswordToken}> link </a></b>`;
+
+    const mailOptions: Mail.Options = {
+      from: GMAIL_USER,
+      to: email,
+      subject: subject,
+      html: body,
+    };
+
+    return mailOptions;
   } catch (error) {
     throw ApiError.from(error);
   }

@@ -12,13 +12,18 @@ import userUpdateUsernameSchema from '../validations/user-update-username-schema
 import userUpdatePasswordSchema from '../validations/user-update-password-schema';
 import userResetPasswordSchema from '../validations/user-reset-password-schema';
 import userForgotPasswordSchema from '../validations/user-forgot-password-schema';
+import userUpdateSkillsSchema from '../validations/user-update-skills-schema';
+import userUpdateSocialsSchema from '../validations/user-update-socials-schema';
+import userUpdateEmailSchema from '../validations/user-update-email-schema';
 
 const router: Router = Router();
 
 router.get('/', userController.getAll);
-router.get('/filter', userController.filter);
+router.get('/notify', userController.notify);
+router.get('/search', userController.search);
 router.get('/interviews-made/:username', userController.getInterviewsMade);
 router.get('/interviews-had/:username', userController.getInterviewsHad);
+router.get('/video', userController.createVideoMeeting);
 router.get('/:username', userController.getProfile);
 router.get('/:_id', authentication.authenticateByAccessToken, userController.getById);
 
@@ -31,6 +36,18 @@ router.post(
 );
 
 router.put('/', authentication.authenticateByAccessToken, validator.validate(userInfoSchema), userController.update);
+router.put(
+  '/skills',
+  authentication.authenticateByAccessToken,
+  validator.validate(userUpdateSkillsSchema),
+  userController.update
+);
+router.put(
+  '/socials',
+  authentication.authenticateByAccessToken,
+  validator.validate(userUpdateSocialsSchema),
+  userController.update
+);
 router.put(
   '/username',
   authentication.authenticateByAccessToken,
@@ -64,14 +81,14 @@ router.put(
   userController.updatePassword
 );
 
-router.delete(
-  '/:_id',
-  authentication.authenticateByAccessToken,
-  // authorization.authorizeByRole(Role.Admin),
-  userController.deleteById
-);
+router.delete('/:_id', authentication.authenticateByAccessToken, userController.deleteById);
 
-router.put('/update-email', authentication.authenticateByAccessToken, userController.requestEmailUpdate);
-router.put('/update-email/:emailUpdateToken', authentication.authenticateByAccessToken, userController.updateEmail);
+router.put(
+  '/email',
+  authentication.authenticateByAccessToken,
+  validator.validate(userUpdateEmailSchema),
+  userController.requestEmailUpdate
+);
+router.put('/email/:emailUpdateToken', authentication.authenticateByAccessToken, userController.updateEmail);
 
 export default router;

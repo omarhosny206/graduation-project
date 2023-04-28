@@ -2,6 +2,7 @@ import { model, Schema } from 'mongoose';
 
 import IUser from '../interfaces/users/user-interface';
 import { ALL_ROLES } from '../utils/all-roles';
+import { ALL_LEVEL_OF_EXPERIENCES } from '../utils/all-level-of-experiences';
 
 const userSchema = new Schema<IUser>(
   {
@@ -17,7 +18,6 @@ const userSchema = new Schema<IUser>(
         lastName: { type: String, required: true },
         price: { type: Number, required: true, default: 0 },
         priceable: { type: Boolean, required: true, default: false },
-        interests: { type: [{ type: String }], required: false, default: [] },
         skills: { type: [{ type: String }], required: false, default: [] },
         timeslots: {
           type: [
@@ -31,6 +31,7 @@ const userSchema = new Schema<IUser>(
           _id: false,
         },
         bio: { type: String, required: false, default: '' },
+        levelOfExperience: { type: String, required: true, enum: ALL_LEVEL_OF_EXPERIENCES },
         interviewsHad: [{ type: Schema.Types.ObjectId }],
         interviewsMade: [{ type: Schema.Types.ObjectId }],
         socials: {

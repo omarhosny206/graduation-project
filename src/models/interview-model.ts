@@ -33,6 +33,7 @@ const interviewSchema = new Schema<IInterview>(
     },
     isFinished: { type: Boolean, required: true, default: false },
     price: { type: Number, required: true, min: 5 },
+    isPaid: { type: Boolean, required: true, default: false },
     status: { type: String, enum: ALL_STATUS, required: true, default: InterviewStatus.Pending },
   },
   {

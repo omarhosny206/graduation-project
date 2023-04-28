@@ -2,7 +2,6 @@ import { NextFunction, Request, Response } from 'express';
 import mongoose from 'mongoose';
 
 import { StatusCode } from '../enums/status-code-enum';
-import IInterviewFilterCriteria from '../interfaces/interviews/interview-filter-criteria-interface';
 import IInterviewInfo from '../interfaces/interviews/interview-info-interface';
 import IInterview from '../interfaces/interviews/interview-interface';
 import IReview from '../interfaces/interviews/review-interface';
@@ -37,10 +36,13 @@ export async function getInterviewsMade(req: Request, res: Response, next: NextF
   }
 }
 
-export async function filter(req: Request, res: Response, next: NextFunction) {
+export async function search(req: Request, res: Response, next: NextFunction) {
   try {
-    const filterCriteria: IInterviewFilterCriteria = req.body;
-    const interviews = await interviewService.filter(filterCriteria);
+    const filterCriteria = req.query;
+
+    console.log('req.query: ', filterCriteria);
+
+    const interviews = await interviewService.search(filterCriteria);
     return res.status(StatusCode.Ok).json(interviews);
   } catch (error) {
     return next(error);

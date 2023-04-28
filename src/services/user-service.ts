@@ -5,7 +5,6 @@ import { Role } from '../enums/role-enum';
 import IPasswordReset from '../interfaces/users/password-reset-interface';
 import IPasswordUpdate from '../interfaces/users/password-update-interface';
 import ITimeslot from '../interfaces/users/timeslot-interface';
-import IUserFilterCriteria from '../interfaces/users/user-filter-criteria-interface';
 import IUserInfo from '../interfaces/users/user-info-interface';
 import IUser from '../interfaces/users/user-interface';
 import UserModel from '../models/user-model';
@@ -15,6 +14,7 @@ import ApiError from '../utils/api-error';
 import { AuthenticatedUser } from '../utils/authenticated-user-type';
 import * as jwt from '../utils/jwt';
 import { hasOverlappingTimeslots } from '../utils/time-slots';
+import * as emailPublisherService from './email-publisher-service';
 
 export async function getAll() {
   try {
@@ -48,9 +48,61 @@ export async function getProfile(username: string) {
   }
 }
 
-export async function filter(filterCriteria: IUserFilterCriteria) {
+export async function search(searchCriteria: any) {
   try {
-    const users = await UserModel.find(filterCriteria);
+    let filters: any[] = [];
+
+    if (searchCriteria['info.skills']) {
+      const queries = searchCriteria['info.skills']
+        .split(',')
+        .map((value: string) => value.trim())
+        .filter((value: string) => value.length);
+      console.log(queries);
+
+      const multipleValuesFilters = queries.map((value: string) => ({
+        text: {
+          query: value,
+          path: 'info.skills',
+          fuzzy: {},
+        },
+      }));
+
+      filters = [...multipleValuesFilters];
+    }
+
+    if (searchCriteria['fullTextSearch']) {
+      const query = searchCriteria['fullTextSearch'];
+      console.log(query);
+
+      const fullTextSearchFilter = {
+        text: {
+          query: query,
+          path: ['info.firstName', 'info.lastName', 'info.bio'],
+          fuzzy: {},
+        },
+      };
+
+      filters.push(fullTextSearchFilter);
+    }
+
+    let users = await UserModel.aggregate([
+      {
+        $search: {
+          index: 'users_search_index',
+          compound: {
+            must: filters,
+          },
+        },
+      },
+      {
+        $project: {
+          score: { $meta: 'searchScore' },
+          document: '$$ROOT',
+        },
+      },
+    ]).sort({ score: -1, 'document.info.price': 1 });
+
+    users = users.map((user) => ({ _id: user._id, score: user.score, ...user.document }));
     return users;
   } catch (error) {
     throw ApiError.from(error);
@@ -160,6 +212,16 @@ export async function forgotPassword(email: string) {
   try {
     const user = await getByEmail(email);
     await emailService.sendResetPassword(email);
+  } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
+export async function forgotPassword2(email: string) {
+  try {
+    const user = await getByEmail(email);
+    const mailOptions = await emailService.getResetPasswordMailOptions(email);
+    await emailPublisherService.publish(mailOptions);
   } catch (error) {
     throw ApiError.from(error);
   }
@@ -309,7 +371,22 @@ export async function checkEmailUpdate(email: string) {
       throw ApiError.badRequest('This email is already taken.');
     }
     await emailService.sendEmailUpdate(email);
-    } catch (error) {
+  } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
+export async function checkEmailUpdate2(email: string) {
+  try {
+    const user = await UserModel.findOne({ email: email });
+
+    if (user) {
+      throw ApiError.badRequest('This email is already taken.');
+    }
+
+    const mailOptions = await emailService.getEmailUpdateMailOptions(email);
+    await emailPublisherService.publish(mailOptions);
+  } catch (error) {
     throw ApiError.from(error);
   }
 }
@@ -320,7 +397,7 @@ export async function updateEmail(emailUpdateToken: string, user: AuthenticatedU
     user.email = email;
     const updatedUser = await user.save();
     return updatedUser;
-    } catch (error) {
+  } catch (error) {
     throw ApiError.from(error);
   }
 }
@@ -334,7 +411,7 @@ export async function getByEmailOrDefault(email: string, defaultValue: null = nu
     }
 
     return user;
-} catch (error) {
+  } catch (error) {
     throw ApiError.from(error);
   }
 }
@@ -351,4 +428,13 @@ export async function existsByUsername(username: string) {
   } catch (error) {
     throw ApiError.from(error);
   }
+}
+
+export async function createVideoMeeting() {
+  const mailOptions = await emailService.getVideoMeetingMailOptions(
+    'omarhosny102@gmail.com',
+    'softwarenotes1@gmail.com'
+  );
+
+  await Promise.all(mailOptions.map((mailOption) => emailPublisherService.publish(mailOption)));
 }

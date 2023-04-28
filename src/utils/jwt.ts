@@ -15,6 +15,9 @@ const EMAIL_UPDATING_TOKEN_SECRET_KEY: string | undefined = process.env.EMAIL_UP
 const EMAIL_UPDATING_TOKEN_EXPIRATION: string | undefined = process.env.EMAIL_UPDATING_TOKEN_EXPIRATION;
 const RESET_PASSWORD_TOKEN_SECRET_KEY: string | undefined = process.env.RESET_PASSWORD_TOKEN_SECRET_KEY;
 const RESET_PASSWORD_TOKEN_EXPIRATION: string | undefined = process.env.RESET_PASSWORD_TOKEN_EXPIRATION;
+const ZOOM_API_KEY = process.env.ZOOM_API_KEY;
+const ZOOM_API_SECRET = process.env.ZOOM_API_SECRET;
+const ZOOM_TOKEN_EXPIRATION = process.env.ZOOM_TOKEN_EXPIRATION;
 
 export async function generateAccessToken(email: string): Promise<string> {
   try {
@@ -60,6 +63,16 @@ export async function generateResetPasswordToken(email: string): Promise<string>
   try {
     const signOptions: jwt.SignOptions = { expiresIn: RESET_PASSWORD_TOKEN_EXPIRATION };
     const token = await jwt.sign({ email: email }, RESET_PASSWORD_TOKEN_SECRET_KEY!, signOptions);
+    return token;
+  } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
+export async function generateVideoMeetingToken(): Promise<string> {
+  try {
+    const signOptions: jwt.SignOptions = { expiresIn: ZOOM_TOKEN_EXPIRATION };
+    const token = await jwt.sign({ iss: ZOOM_API_KEY }, ZOOM_API_SECRET!, signOptions);
     return token;
   } catch (error) {
     throw ApiError.from(error);

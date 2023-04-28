@@ -1,0 +1,14 @@
+/node_modules
+Dockerfile
+# .env
+docker-compose*
+docker*.yml
+
+.git
+.gitignore
+.config
+
+.npm
+.vscode
+
+README.md

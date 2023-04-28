@@ -12,6 +12,7 @@ import interviewUpdateReviewSchema from '../validations/interview-update-review-
 const router: Router = Router();
 
 router.get('/', interviewController.getAll);
+router.get('/search', interviewController.search);
 router.get('/interviews-had/:username', interviewController.getInterviewsHad);
 router.get('/interviews-made/:username', interviewController.getInterviewsMade);
 router.post(

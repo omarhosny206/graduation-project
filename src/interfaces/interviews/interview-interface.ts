@@ -12,4 +12,5 @@ export default interface IInterview {
   date: Date;
   info?: IInterviewInfo;
   price: number;
+  isPaid: boolean;
 }

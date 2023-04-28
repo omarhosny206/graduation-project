@@ -2,7 +2,6 @@ import { Types } from 'mongoose';
 
 import { InterviewStatus } from '../enums/interview-status-enum';
 import { Role } from '../enums/role-enum';
-import IInterviewFilterCriteria from '../interfaces/interviews/interview-filter-criteria-interface';
 import IInterviewInfo from '../interfaces/interviews/interview-info-interface';
 import IInterview from '../interfaces/interviews/interview-interface';
 import IReview from '../interfaces/interviews/review-interface';
@@ -57,9 +56,55 @@ export async function getById(_id: Types.ObjectId) {
   }
 }
 
-export async function filter(filterCriteria: IInterviewFilterCriteria) {
+export async function search(filterCriteria: any) {
   try {
-    const interviews = await InterviewModel.find(filterCriteria);
+    const fieldsToFilterBy = Object.keys(filterCriteria);
+
+    const singleValueFilters = fieldsToFilterBy
+      .filter((field) => !(filterCriteria[field] instanceof Array))
+      .map((field) => ({
+        text: {
+          query: filterCriteria[field] as string,
+          path: field,
+          fuzzy: {},
+        },
+      }));
+
+    const multipleValuesFilters = fieldsToFilterBy
+      .filter((field) => filterCriteria[field] instanceof Array)
+      .map((field) =>
+        filterCriteria[field].map((value: string) => ({
+          text: {
+            query: value,
+            path: field,
+            fuzzy: {},
+          },
+        }))
+      );
+
+    const filters = [...singleValueFilters];
+    multipleValuesFilters.forEach((filter) => filters.push(...filter));
+
+    console.log('FILTERS : ', filters);
+
+    let interviews = await InterviewModel.aggregate([
+      {
+        $search: {
+          index: 'interviews_search_index',
+          compound: {
+            must: filters,
+          },
+        },
+      },
+      {
+        $project: {
+          score: { $meta: 'searchScore' },
+          document: '$$ROOT',
+        },
+      },
+    ]).sort({ score: -1 });
+
+    interviews = interviews.map((interview) => ({ _id: interview._id, score: interview.score, ...interview.document }));
     return interviews;
   } catch (error) {
     throw ApiError.from(error);
@@ -202,9 +247,32 @@ export async function confirm(_id: Types.ObjectId, user: AuthenticatedUser) {
     if (interview.isFinished || interview.status !== InterviewStatus.Pending) {
       throw ApiError.badRequest('Interview is either finished or in processing stage.');
     }
-    
+
     interview.status = InterviewStatus.Confirmed;
     await interview.save();
+  } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
+export async function markAsFinished(currentDate: Date) {
+  try {
+    const interviews = await getAll();
+
+    const interviewsToMarkAsFinished = interviews.filter(
+      (interview) =>
+        interview.status == InterviewStatus.Confirmed &&
+        interview.isPaid &&
+        interview.date.getTime() <= currentDate.getTime()
+    );
+
+    interviewsToMarkAsFinished.forEach((interview) => {
+      console.log(`Interview (${interview._id}) marked as finished`);
+      interview.status = InterviewStatus.Finished;
+      interview.isFinished = true;
+    });
+
+    await InterviewModel.bulkSave(interviewsToMarkAsFinished);
   } catch (error) {
     throw ApiError.from(error);
   }

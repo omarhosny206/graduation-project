@@ -5,8 +5,8 @@ import { StatusCode } from '../enums/status-code-enum';
 import IPasswordReset from '../interfaces/users/password-reset-interface';
 import IPasswordUpdate from '../interfaces/users/password-update-interface';
 import ITimeslot from '../interfaces/users/timeslot-interface';
-import IUserFilterCriteria from '../interfaces/users/user-filter-criteria-interface';
 import IUserInfo from '../interfaces/users/user-info-interface';
+import * as notificationService from '../services/notification-service';
 import * as userService from '../services/user-service';
 
 export async function getAll(req: Request, res: Response, next: NextFunction) {
@@ -28,11 +28,14 @@ export async function getProfile(req: Request, res: Response, next: NextFunction
   }
 }
 
-export async function filter(req: Request, res: Response, next: NextFunction) {
+export async function search(req: Request, res: Response, next: NextFunction) {
   try {
-    const filterCriteria: IUserFilterCriteria = req.body;
-    const user = await userService.filter(filterCriteria);
-    return res.status(StatusCode.Ok).json(user);
+    const filterCriteria = req.query;
+
+    console.log('req.query: ', filterCriteria);
+
+    const users = await userService.search(filterCriteria);
+    return res.status(StatusCode.Ok).json(users);
   } catch (error) {
     return next(error);
   }
@@ -143,6 +146,16 @@ export async function forgotPassword(req: Request, res: Response, next: NextFunc
   }
 }
 
+export async function forgotPassword2(req: Request, res: Response, next: NextFunction) {
+  try {
+    const email: string = req.body.email;
+    await userService.forgotPassword2(email);
+    return res.status(StatusCode.Ok).json({ message: 'Email sent to reset password' });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 export async function resetPassword(req: Request, res: Response, next: NextFunction) {
   try {
     const { resetPasswordToken } = req.params;
@@ -184,12 +197,40 @@ export async function requestEmailUpdate(req: Request, res: Response, next: Next
   }
 }
 
+export async function requestEmailUpdate2(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { email } = req.body;
+    await userService.checkEmailUpdate2(email);
+    return res.status(StatusCode.Ok).json({ message: 'Email sent to update email' });
+  } catch (error) {
+    next(error);
+  }
+}
+
 export async function updateEmail(req: Request, res: Response, next: NextFunction) {
   try {
     const { emailUpdateToken } = req.params;
     const authenticatedUser = req.authenticatedUser;
     const updatedUser = await userService.updateEmail(emailUpdateToken, authenticatedUser);
     return res.status(StatusCode.Ok).json(updatedUser);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function createVideoMeeting(req: Request, res: Response, next: NextFunction) {
+  try {
+    await userService.createVideoMeeting();
+    return res.status(StatusCode.Ok).json({ message: 'Emails sent' });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function notify(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await notificationService.notify();
+    return res.json(data);
   } catch (error) {
     next(error);
   }
