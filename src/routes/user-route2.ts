@@ -13,7 +13,7 @@ router.put(
   '/email',
   authentication.authenticateByAccessToken,
   validator.validate(userUpdateEmailSchema),
-  userController.requestEmailUpdate
+  userController.requestEmailUpdate2
 );
 
 export default router;
