@@ -197,6 +197,18 @@ export async function getInterviewsMade(req: Request, res: Response, next: NextF
   }
 }
 
+export async function getInterviewsMadeGroupedByStatus(req: Request, res: Response, next: NextFunction) {
+    try {
+        const authenticatedUser = req.authenticatedUser;
+      const groupedInterviewsMade = await userService.getInterviewsMadeGroupedByStatus(authenticatedUser);
+      return res.status(StatusCode.Ok).json(groupedInterviewsMade);
+    } catch (error) {
+      return next(error);
+    }
+  }
+  
+ 
+
 export async function getInterviewsHad(req: Request, res: Response, next: NextFunction) {
   try {
     const { username } = req.params;
@@ -206,6 +218,16 @@ export async function getInterviewsHad(req: Request, res: Response, next: NextFu
     return next(error);
   }
 }
+
+export async function getInterviewsHadGroupedByStatus(req: Request, res: Response, next: NextFunction) {
+    try {
+        const authenticatedUser = req.authenticatedUser;
+      const groupedInterviewsHad = await userService.getInterviewsHadGroupedByStatus(authenticatedUser);
+      return res.status(StatusCode.Ok).json(groupedInterviewsHad);
+    } catch (error) {
+      return next(error);
+    }
+  }
 
 export async function requestEmailUpdate(req: Request, res: Response, next: NextFunction) {
   try {

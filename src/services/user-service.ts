@@ -2,6 +2,8 @@ import bcrypt from 'bcrypt';
 import { Types } from 'mongoose';
 
 import { Role } from '../enums/role-enum';
+import IInterview from '../interfaces/interviews/interview-interface';
+import IFixedUsers from '../interfaces/users/fixed-users-interface';
 import IPasswordReset from '../interfaces/users/password-reset-interface';
 import IPasswordUpdate from '../interfaces/users/password-update-interface';
 import ISigninResponse from '../interfaces/users/signin-response-interface';
@@ -16,8 +18,6 @@ import { AuthenticatedUser } from '../utils/authenticated-user-type';
 import * as jwt from '../utils/jwt';
 import { hasOverlappingTimeslots } from '../utils/time-slots';
 import * as emailPublisherService from './email-publisher-service';
-import IFixedUsers from '../interfaces/users/fixed-users-interface';
-import IInterview from '../interfaces/interviews/interview-interface';
 
 export async function getAll() {
   try {
@@ -341,6 +341,15 @@ export async function getInterviewsHad(username: string) {
   }
 }
 
+export async function getInterviewsHadGroupedByStatus(user: AuthenticatedUser) {
+  try {
+    const groupedInterviewsHad = await interviewService.getInterviewsHadGroupedByStatus(user.username);
+    return groupedInterviewsHad;
+  } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
 export async function getById(_id: Types.ObjectId) {
   try {
     const user = await UserModel.findById(_id);
@@ -406,6 +415,16 @@ export async function editTimeslots(user: AuthenticatedUser, timeslots: ITimeslo
 export async function getInterviewsMade(username: string) {
   try {
     return await interviewService.getInterviewsMade(username);
+  } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
+
+export async function getInterviewsMadeGroupedByStatus(user: AuthenticatedUser) {
+  try {
+    const groupedInterviewsMade = await interviewService.getInterviewsMadeGroupedByStatus(user.username);
+    return groupedInterviewsMade;
   } catch (error) {
     throw ApiError.from(error);
   }

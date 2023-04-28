@@ -5,11 +5,11 @@ import { Role } from '../enums/role-enum';
 import IInterviewInfo from '../interfaces/interviews/interview-info-interface';
 import IInterview from '../interfaces/interviews/interview-interface';
 import IReview from '../interfaces/interviews/review-interface';
+import IUser from '../interfaces/users/user-interface';
 import InterviewModel from '../models/interview-model';
 import * as userService from '../services/user-service';
 import ApiError from '../utils/api-error';
 import { AuthenticatedUser } from '../utils/authenticated-user-type';
-import IUser from '../interfaces/users/user-interface';
 
 export async function getAll() {
   try {
@@ -296,6 +296,46 @@ export async function getInterviewsHadWithReviews(user: IUser) {
     const interviewsHad = await InterviewModel.find({ interviewee: user._id });
     const interviewsWithReviews = interviewsHad.filter((interview) => interview.info && interview.info.reviews);
     return interviewsWithReviews;
+  } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
+export async function getInterviewsHadGroupedByStatus(username: string) {
+  try {
+    const interviewsHad = await getInterviewsHad(username);
+
+    const groupedInterviewsHad = interviewsHad.reduce((acc: any, interview: IInterview) => {
+      const status = interview.status;
+      if (acc[status]) {
+        acc[status].push(interview);
+      } else {
+        acc[status] = [interview];
+      }
+      return acc;
+    }, {});
+
+    return groupedInterviewsHad;
+  } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
+export async function getInterviewsMadeGroupedByStatus(username: string) {
+  try {
+    const interviewsMade = await getInterviewsMade(username);
+
+    const groupedInterviewsMade = interviewsMade.reduce((acc: any, interview: IInterview) => {
+      const status = interview.status;
+      if (acc[status]) {
+        acc[status].push(interview);
+      } else {
+        acc[status] = [interview];
+      }
+      return acc;
+    }, {});
+
+    return groupedInterviewsMade;
   } catch (error) {
     throw ApiError.from(error);
   }
