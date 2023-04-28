@@ -211,8 +211,8 @@ export async function updateEmail(req: Request, res: Response, next: NextFunctio
   try {
     const { emailUpdateToken } = req.params;
     const authenticatedUser = req.authenticatedUser;
-    const updatedUser = await userService.updateEmail(emailUpdateToken, authenticatedUser);
-    return res.status(StatusCode.Ok).json(updatedUser);
+    const signinResponse = await userService.updateEmail(emailUpdateToken, authenticatedUser);
+    return res.status(StatusCode.Ok).json(signinResponse);
   } catch (error) {
     next(error);
   }

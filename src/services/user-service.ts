@@ -4,6 +4,7 @@ import { Types } from 'mongoose';
 import { Role } from '../enums/role-enum';
 import IPasswordReset from '../interfaces/users/password-reset-interface';
 import IPasswordUpdate from '../interfaces/users/password-update-interface';
+import ISigninResponse from '../interfaces/users/signin-response-interface';
 import ITimeslot from '../interfaces/users/timeslot-interface';
 import IUserInfo from '../interfaces/users/user-info-interface';
 import IUser from '../interfaces/users/user-interface';
@@ -396,7 +397,10 @@ export async function updateEmail(emailUpdateToken: string, user: AuthenticatedU
     const { email } = await jwt.verifyEmailUpdatingToken(emailUpdateToken);
     user.email = email;
     const updatedUser = await user.save();
-    return updatedUser;
+    const accessToken = await jwt.generateAccessToken(updatedUser.email);
+    const refreshToken = await jwt.generateRefreshToken(updatedUser.email);
+    const signinResponse: ISigninResponse = { user: updatedUser, accessToken: accessToken, refreshToken: refreshToken };
+    return signinResponse;
   } catch (error) {
     throw ApiError.from(error);
   }
