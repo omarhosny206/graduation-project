@@ -9,6 +9,7 @@ import InterviewModel from '../models/interview-model';
 import * as userService from '../services/user-service';
 import ApiError from '../utils/api-error';
 import { AuthenticatedUser } from '../utils/authenticated-user-type';
+import IUser from '../interfaces/users/user-interface';
 
 export async function getAll() {
   try {
@@ -119,7 +120,7 @@ export async function update(_id: Types.ObjectId, user: AuthenticatedUser, inter
       throw ApiError.badRequest('Cannot update info, you are not a member in this interview');
     }
 
-    if (!interview.isFinished || interview.status !== InterviewStatus.Finished) {
+    if (interview.status !== InterviewStatus.Finished) {
       throw ApiError.badRequest('Cannot update info, interview not finished yet');
     }
 
@@ -156,7 +157,7 @@ export async function updateReview(_id: Types.ObjectId, user: AuthenticatedUser,
       throw ApiError.badRequest('Cannot update reviews, users must be different');
     }
 
-    if (!interview.isFinished || interview.status !== InterviewStatus.Finished) {
+    if (interview.status !== InterviewStatus.Finished) {
       throw ApiError.badRequest('Cannot update reviews, interview not finished yet');
     }
 
@@ -224,7 +225,7 @@ export async function reject(_id: Types.ObjectId, user: AuthenticatedUser) {
       throw ApiError.badRequest('Cannot reject interview, you are not a member in this interview');
     }
 
-    if (interview.isFinished || interview.status !== InterviewStatus.Pending) {
+    if (interview.status !== InterviewStatus.Pending) {
       throw ApiError.badRequest('Cannot reject interview, interview is either finished or in processing-stage');
     }
 
@@ -244,7 +245,7 @@ export async function confirm(_id: Types.ObjectId, user: AuthenticatedUser) {
       throw ApiError.badRequest('You cannot confirm this interview');
     }
 
-    if (interview.isFinished || interview.status !== InterviewStatus.Pending) {
+    if (interview.status !== InterviewStatus.Pending) {
       throw ApiError.badRequest('Interview is either finished or in processing stage.');
     }
 
@@ -269,10 +270,32 @@ export async function markAsFinished(currentDate: Date) {
     interviewsToMarkAsFinished.forEach((interview) => {
       console.log(`Interview (${interview._id}) marked as finished`);
       interview.status = InterviewStatus.Finished;
-      interview.isFinished = true;
     });
 
     await InterviewModel.bulkSave(interviewsToMarkAsFinished);
+  } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
+export async function getInterviewsMadeWithReviews(user: IUser) {
+  try {
+    if (user.role === Role.Interviewee) {
+      throw ApiError.badRequest('Cannot get interviews made, interviewee role is not allowed to make interviews');
+    }
+    const interviewsMade = await InterviewModel.find({ interviewer: user._id });
+    const interviewsWithReviews = interviewsMade.filter((interview) => interview.info && interview.info.reviews);
+    return interviewsWithReviews;
+  } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
+export async function getInterviewsHadWithReviews(user: IUser) {
+  try {
+    const interviewsHad = await InterviewModel.find({ interviewee: user._id });
+    const interviewsWithReviews = interviewsHad.filter((interview) => interview.info && interview.info.reviews);
+    return interviewsWithReviews;
   } catch (error) {
     throw ApiError.from(error);
   }

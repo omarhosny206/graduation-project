@@ -16,11 +16,56 @@ import { AuthenticatedUser } from '../utils/authenticated-user-type';
 import * as jwt from '../utils/jwt';
 import { hasOverlappingTimeslots } from '../utils/time-slots';
 import * as emailPublisherService from './email-publisher-service';
+import IFixedUsers from '../interfaces/users/fixed-users-interface';
+import IInterview from '../interfaces/interviews/interview-interface';
 
 export async function getAll() {
   try {
     const users = await UserModel.find();
     return users;
+  } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
+export async function getAllFixed() {
+  try {
+    let results: IUser[][] = await Promise.all([
+      UserModel.find({ role: Role.Interviewer, 'info.priceable': false }),
+      UserModel.find({ role: Role.Interviewer, 'info.priceable': true }),
+      UserModel.find({ role: Role.Interviewer, 'info.skills': { $in: ['DSA'] } }),
+      UserModel.find({ role: Role.Interviewer, 'info.skills': { $in: ['System Design'] } }),
+    ]);
+
+    const newResults = await Promise.all(
+      results.map(async (result) => {
+        let newResult = (
+          await Promise.all(
+            result.map(async (value: IUser) => {
+              const interviewsMadeWithReviews = await interviewService.getInterviewsMadeWithReviews(value);
+              const rating = await getRatingForInterviewer(value, interviewsMadeWithReviews);
+              return { ...value, rating: rating };
+            })
+          )
+        ).sort((a: any, b: any) => b.rating - a.rating);
+
+        if (newResult.length > 5) {
+          newResult = newResult.slice(0, 5);
+        }
+        return newResult.map((value: any) => ({ ...value._doc, rating: value.rating }));
+      })
+    );
+
+    const [free, priceable, dsa, systemDesign] = newResults;
+
+    const fixedUsers: IFixedUsers = {
+      free: free,
+      priceable: priceable,
+      dsa: dsa,
+      systemDesign: systemDesign,
+    };
+
+    return fixedUsers;
   } catch (error) {
     throw ApiError.from(error);
   }
@@ -43,7 +88,18 @@ export async function getByEmail(email: string) {
 export async function getProfile(username: string) {
   try {
     const user = await getByUserName(username);
-    return user;
+    let interviewsWithReviews = null;
+    let rating = null;
+
+    if (user.role === Role.Interviewer) {
+      interviewsWithReviews = await interviewService.getInterviewsMadeWithReviews(user);
+      rating = await getRatingForInterviewer(user, interviewsWithReviews);
+    } else {
+      interviewsWithReviews = await interviewService.getInterviewsHadWithReviews(user);
+      rating = await getRatingForInterviewee(user, interviewsWithReviews);
+    }
+
+    return { ...(user as any)._doc, rating: rating };
   } catch (error) {
     throw ApiError.from(error);
   }
@@ -86,6 +142,8 @@ export async function search(searchCriteria: any) {
       filters.push(fullTextSearchFilter);
     }
 
+    console.log(filters);
+
     let users = await UserModel.aggregate([
       {
         $search: {
@@ -103,7 +161,21 @@ export async function search(searchCriteria: any) {
       },
     ]).sort({ score: -1, 'document.info.price': 1 });
 
-    users = users.map((user) => ({ _id: user._id, score: user.score, ...user.document }));
+    users = await Promise.all(
+      users
+        .map((user) => ({ _id: user._id, score: user.score, ...user.document }))
+        .map(async (user) => {
+          const interviewsMadeWithReviews = await interviewService.getInterviewsMadeWithReviews(user);
+          const rating = await getRatingForInterviewer(user, interviewsMadeWithReviews);
+          console.log('rating:', rating);
+          console.log('new:', { ...user, rating: rating });
+
+          return { ...user, rating: rating };
+        })
+    );
+
+    console.log('USERS:', users);
+
     return users;
   } catch (error) {
     throw ApiError.from(error);
@@ -125,13 +197,27 @@ export async function update(user: AuthenticatedUser, userInfo: IUserInfo) {
   }
 }
 
+export async function updateSkills(user: AuthenticatedUser, skills: string[]) {
+  try {
+    if (!user.info) {
+      throw ApiError.badRequest('User info is required');
+    }
+
+    user.info.skills = skills;
+    const updatedUser = await user.save();
+    return updatedUser;
+  } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
 export async function updatePrice(user: AuthenticatedUser, price: number) {
   try {
     if (!user.info) {
       throw ApiError.badRequest('User info is required');
     }
 
-    if (!isIllegibleForPricing(user)) {
+    if (!(await isIllegibleForPricing(user))) {
       throw ApiError.badRequest('Cannot update price, user is not illegible for pricing');
     }
 
@@ -331,30 +417,16 @@ export async function isIllegibleForPricing(user: AuthenticatedUser) {
       return true;
     }
 
-    const interviewsMade = await getInterviewsMade(user.username);
-    const interviewsWithReviews = interviewsMade.filter((interview) => interview.info && interview.info.reviews);
+    const interviewsMadeWithReviews = await interviewService.getInterviewsMadeWithReviews(user);
 
-    const interviewerRating = interviewsWithReviews.map((interview) => {
-      for (const review of interview.info?.reviews!) {
-        if (user._id.equals(review.to)) {
-          return review.rating;
-        }
-      }
-    });
-
-    if (interviewerRating.length < 3) {
+    if (interviewsMadeWithReviews.length < 3) {
       throw ApiError.badRequest('Not illegible, you must have at least 3 finished interviews with ratings');
     }
 
-    const ratingSum = interviewerRating.reduce((accumulator, currentVal) => {
-      return accumulator! + currentVal!;
-    }, 0);
+    const rating: number = await getRatingForInterviewer(user, interviewsMadeWithReviews);
+    console.log('rating=', rating);
 
-    const avgRating = ratingSum! / interviewerRating.length;
-
-    console.log(avgRating);
-
-    if (avgRating < 3) {
+    if (rating < 3) {
       return false;
     }
 
@@ -362,6 +434,48 @@ export async function isIllegibleForPricing(user: AuthenticatedUser) {
   } catch (error) {
     throw ApiError.from(error);
   }
+}
+
+export async function getRatingForInterviewer(user: IUser, interviewsMadeWithReviews: IInterview[]) {
+  const interviewerRatings = interviewsMadeWithReviews.map((interview) => {
+    for (const review of interview.info?.reviews!) {
+      if (user._id.equals(review.to)) {
+        return review.rating;
+      }
+    }
+  });
+
+  const ratingsSum = interviewerRatings.reduce((accumulator, currentVal) => {
+    return accumulator! + currentVal!;
+  }, 0);
+
+  if (ratingsSum === 0) {
+    return 0;
+  }
+
+  const avgRating = ratingsSum! / interviewerRatings.length;
+  return avgRating;
+}
+
+export async function getRatingForInterviewee(user: IUser, interviewsHadWithReviews: IInterview[]) {
+  const intervieweeRatings = interviewsHadWithReviews.map((interview) => {
+    for (const review of interview.info?.reviews!) {
+      if (user._id.equals(review.to)) {
+        return review.rating;
+      }
+    }
+  });
+
+  const ratingsSum = intervieweeRatings.reduce((accumulator, currentVal) => {
+    return accumulator! + currentVal!;
+  }, 0);
+
+  if (ratingsSum === 0) {
+    return 0;
+  }
+
+  const avgRating = ratingsSum! / intervieweeRatings.length;
+  return avgRating;
 }
 
 export async function checkEmailUpdate(email: string) {

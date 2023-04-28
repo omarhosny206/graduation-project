@@ -19,6 +19,7 @@ import userUpdateEmailSchema from '../validations/user-update-email-schema';
 const router: Router = Router();
 
 router.get('/', userController.getAll);
+router.get('/fixed', userController.getAllFixed);
 router.get('/notify', userController.notify);
 router.get('/search', userController.search);
 router.get('/interviews-made/:username', userController.getInterviewsMade);
@@ -40,7 +41,7 @@ router.put(
   '/skills',
   authentication.authenticateByAccessToken,
   validator.validate(userUpdateSkillsSchema),
-  userController.update
+  userController.updateSkills
 );
 router.put(
   '/socials',

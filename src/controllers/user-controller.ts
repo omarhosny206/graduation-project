@@ -18,6 +18,15 @@ export async function getAll(req: Request, res: Response, next: NextFunction) {
   }
 }
 
+export async function getAllFixed(req: Request, res: Response, next: NextFunction) {
+  try {
+    const fixedUsers = await userService.getAllFixed();
+    return res.status(StatusCode.Ok).json(fixedUsers);
+  } catch (error) {
+    return next(error);
+  }
+}
+
 export async function getProfile(req: Request, res: Response, next: NextFunction) {
   try {
     const { username } = req.params;
@@ -46,6 +55,17 @@ export async function update(req: Request, res: Response, next: NextFunction) {
     const userInfo: IUserInfo = req.body;
     const authenticatedUser = req.authenticatedUser;
     const updatedUser = await userService.update(authenticatedUser, userInfo);
+    return res.status(StatusCode.Ok).json(updatedUser);
+  } catch (error) {
+    return next(error);
+  }
+}
+
+export async function updateSkills(req: Request, res: Response, next: NextFunction) {
+  try {
+    const skills: string[] = req.body.skills;
+    const authenticatedUser = req.authenticatedUser;
+    const updatedUser = await userService.updateSkills(authenticatedUser, skills);
     return res.status(StatusCode.Ok).json(updatedUser);
   } catch (error) {
     return next(error);

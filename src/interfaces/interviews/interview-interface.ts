@@ -8,7 +8,6 @@ export default interface IInterview {
   interviewer: Types.ObjectId;
   interviewee: Types.ObjectId;
   status: InterviewStatus;
-  isFinished: boolean;
   date: Date;
   info?: IInterviewInfo;
   price: number;
