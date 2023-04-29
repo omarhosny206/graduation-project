@@ -278,6 +278,30 @@ export async function markAsFinished(currentDate: Date) {
   }
 }
 
+export async function markAsRejected(currentDate: Date) {
+  try {
+    const interviews = await getAll();
+
+    const interviewsToMarkAsRejected = interviews.filter((interview) => {
+      return (
+        (interview.status == InterviewStatus.Confirmed &&
+          !interview.isPaid &&
+          interview.date.getTime() <= currentDate.getTime()) ||
+        (interview.status == InterviewStatus.Pending && interview.date.getTime() <= currentDate.getTime())
+      );
+    });
+
+    interviewsToMarkAsRejected.forEach((interview) => {
+      console.log(`Interview (${interview._id}) marked as rejected`);
+      interview.status = InterviewStatus.Rejected;
+    });
+
+    await InterviewModel.bulkSave(interviewsToMarkAsRejected);
+  } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
 export async function getInterviewsMadeWithReviews(user: IUser) {
   try {
     if (user.role === Role.Interviewee) {
