@@ -74,9 +74,10 @@ export async function getById(req: Request, res: Response, next: NextFunction) {
 
 export async function confirm(req: Request, res: Response, next: NextFunction) {
   try {
-    const { _id } = req.params;
+    const _id = new mongoose.Types.ObjectId(req.params._id);
     const authenticatedUser = req.authenticatedUser;
-    await interviewService.confirm(new mongoose.Types.ObjectId(_id), authenticatedUser);
+    const updatedInterview = await interviewService.confirm(_id, authenticatedUser);
+    return res.status(StatusCode.Ok).json(updatedInterview);
   } catch (error) {
     next(error);
   }

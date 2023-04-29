@@ -226,7 +226,7 @@ export async function reject(_id: Types.ObjectId, user: AuthenticatedUser) {
     }
 
     if (interview.status !== InterviewStatus.Pending) {
-      throw ApiError.badRequest('Cannot reject interview, interview is either finished or in processing-stage');
+      throw ApiError.badRequest('Cannot reject interview, interview is either finished or confirmed');
     }
 
     interview.status = InterviewStatus.Rejected;
@@ -241,16 +241,21 @@ export async function confirm(_id: Types.ObjectId, user: AuthenticatedUser) {
   try {
     const interview = await getById(_id);
 
+    if (interview.status === InterviewStatus.Confirmed) {
+      return interview;
+    }
+
     if (!interview.interviewer.equals(user._id)) {
       throw ApiError.badRequest('You cannot confirm this interview');
     }
 
     if (interview.status !== InterviewStatus.Pending) {
-      throw ApiError.badRequest('Interview is either finished or in processing stage.');
+      throw ApiError.badRequest('Interview is either finished or rejected.');
     }
 
     interview.status = InterviewStatus.Confirmed;
-    await interview.save();
+    const updatedInterview = await interview.save();
+    return updatedInterview;
   } catch (error) {
     throw ApiError.from(error);
   }

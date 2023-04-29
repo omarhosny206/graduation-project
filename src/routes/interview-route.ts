@@ -23,12 +23,6 @@ router.post(
   interviewController.book
 );
 router.get('/:_id', interviewController.getById);
-router.get(
-  '/confirm/:_id',
-  authentication.authenticateByAccessToken,
-  authorization.authorizeByRole(Role.Interviewee),
-  interviewController.confirm
-);
 router.put(
   '/:_id',
   authentication.authenticateByAccessToken,
@@ -48,6 +42,12 @@ router.put(
   authentication.authenticateByAccessToken,
   authorization.authorizeByRole(Role.Interviewee, Role.Interviewer),
   interviewController.reject
+);
+router.put(
+  '/:_id/confirmation',
+  authentication.authenticateByAccessToken,
+  authorization.authorizeByRole(Role.Interviewer),
+  interviewController.confirm
 );
 
 export default router;
