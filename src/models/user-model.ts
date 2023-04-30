@@ -1,8 +1,8 @@
 import { model, Schema } from 'mongoose';
 
 import IUser from '../interfaces/users/user-interface';
-import { ALL_ROLES } from '../utils/all-roles';
 import { ALL_LEVEL_OF_EXPERIENCES } from '../utils/all-level-of-experiences';
+import { ALL_ROLES } from '../utils/all-roles';
 
 const userSchema = new Schema<IUser>(
   {

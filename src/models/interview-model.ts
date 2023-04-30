@@ -9,6 +9,7 @@ const interviewSchema = new Schema<IInterview>(
     interviewee: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     interviewer: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     date: { type: Date, required: true },
+    meetingUrl: { type: String, default: '' },
     info: {
       type: {
         title: { type: String, required: true },
@@ -31,7 +32,7 @@ const interviewSchema = new Schema<IInterview>(
       required: false,
       _id: false,
     },
-    price: { type: Number, required: true, min: 5 },
+    price: { type: Number, required: true, min: 0 },
     isPaid: { type: Boolean, required: true, default: false },
     status: { type: String, enum: ALL_STATUS, required: true, default: InterviewStatus.Pending },
   },

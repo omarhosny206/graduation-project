@@ -1,7 +1,7 @@
 import nodemailer from 'nodemailer';
 import Mail from 'nodemailer/lib/mailer';
 
-import * as videoMeetingService from '../services/video-meeting-service';
+import IUser from '../interfaces/users/user-interface';
 import ApiError from '../utils/api-error';
 import * as jwt from '../utils/jwt';
 
@@ -88,14 +88,13 @@ export async function getEmailConfirmationMailOptions(email: string) {
   }
 }
 
-export async function getVideoMeetingMailOptions(interviewerEmail: string, intervieweeEmail: string) {
+export async function getVideoMeetingMailOptions(interviewer: IUser, interviewee: IUser, meetingUrl: string) {
   try {
-    const meeting = await videoMeetingService.create();
     const subject = '[Pass] Interview Video Meeting';
-    const body = `<p>Interviewer: ${interviewerEmail}</p> <p>Interviewee: ${intervieweeEmail}</p> <b><a href=${meeting.join_url}> Meeting URL </a></b>`;
+    const body = `<p>Interviewer: <a href=localhost:8080/api/v1/users/${interviewer.username}> ${interviewer.username} </a></p> <p>Interviewee: <a href=localhost:8080/api/v1/users/${interviewee.username}> ${interviewee.username} </a></p> <b><a href=${meetingUrl}> Meeting URL </a></b>`;
 
-    const interviewerMailOptions = { from: GMAIL_USER, to: interviewerEmail, html: body, subject: subject };
-    const intervieweeMailOptions = { from: GMAIL_USER, to: intervieweeEmail, html: body, subject: subject };
+    const interviewerMailOptions = { from: GMAIL_USER, to: interviewer.email, html: body, subject: subject };
+    const intervieweeMailOptions = { from: GMAIL_USER, to: interviewee.email, html: body, subject: subject };
     return [interviewerMailOptions, intervieweeMailOptions];
   } catch (error) {
     throw ApiError.from(error);

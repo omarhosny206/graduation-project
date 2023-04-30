@@ -31,7 +31,6 @@ router.get(
 router.get('/interviews-made/:username', userController.getInterviewsMade);
 router.get('/interviews-had', authentication.authenticateByAccessToken, userController.getInterviewsHadGroupedByStatus);
 router.get('/interviews-had/:username', userController.getInterviewsHad);
-router.get('/video', userController.createVideoMeeting);
 router.get('/:username', userController.getProfile);
 router.get('/:_id', authentication.authenticateByAccessToken, userController.getById);
 

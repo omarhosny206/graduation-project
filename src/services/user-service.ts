@@ -420,7 +420,6 @@ export async function getInterviewsMade(username: string) {
   }
 }
 
-
 export async function getInterviewsMadeGroupedByStatus(user: AuthenticatedUser) {
   try {
     const groupedInterviewsMade = await interviewService.getInterviewsMadeGroupedByStatus(user.username);
@@ -565,13 +564,4 @@ export async function existsByUsername(username: string) {
   } catch (error) {
     throw ApiError.from(error);
   }
-}
-
-export async function createVideoMeeting() {
-  const mailOptions = await emailService.getVideoMeetingMailOptions(
-    'omarhosny102@gmail.com',
-    'softwarenotes1@gmail.com'
-  );
-
-  await Promise.all(mailOptions.map((mailOption) => emailPublisherService.publish(mailOption)));
 }

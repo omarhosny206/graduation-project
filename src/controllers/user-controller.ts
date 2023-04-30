@@ -260,15 +260,6 @@ export async function updateEmail(req: Request, res: Response, next: NextFunctio
   }
 }
 
-export async function createVideoMeeting(req: Request, res: Response, next: NextFunction) {
-  try {
-    await userService.createVideoMeeting();
-    return res.status(StatusCode.Ok).json({ message: 'Emails sent' });
-  } catch (error) {
-    next(error);
-  }
-}
-
 export async function notify(req: Request, res: Response, next: NextFunction) {
   try {
     const data = await notificationService.notify();

@@ -7,7 +7,10 @@ import IInterview from '../interfaces/interviews/interview-interface';
 import IReview from '../interfaces/interviews/review-interface';
 import IUser from '../interfaces/users/user-interface';
 import InterviewModel from '../models/interview-model';
+import * as emailPublisherService from '../services/email-publisher-service';
+import * as emailService from '../services/email-service';
 import * as userService from '../services/user-service';
+import * as videoMeetingService from '../services/video-meeting-service';
 import ApiError from '../utils/api-error';
 import { AuthenticatedUser } from '../utils/authenticated-user-type';
 
@@ -182,12 +185,10 @@ export async function updateReview(_id: Types.ObjectId, user: AuthenticatedUser,
 
 export async function book(interview: IInterview, user: AuthenticatedUser) {
   try {
-    const [interviewerPromise, intervieweePromise] = [
+    const [interviewer, interviewee] = await Promise.all([
       userService.getById(interview.interviewer),
       userService.getById(interview.interviewee),
-    ];
-
-    const [interviewer, interviewee] = await Promise.all([interviewerPromise, intervieweePromise]);
+    ]);
 
     if (interviewer.role !== Role.Interviewer) {
       throw ApiError.badRequest('Cannot save interview, interviewee cannot make interviews');
@@ -199,6 +200,11 @@ export async function book(interview: IInterview, user: AuthenticatedUser) {
 
     if (!user._id.equals(interview.interviewer) && !user._id.equals(interview.interviewee)) {
       throw ApiError.badRequest('Cannot save interview, you are not a member in this interview');
+    }
+
+    interview.price = interviewer.info.price;
+    if (interview.price === 0) {
+      interview.isPaid = true;
     }
 
     const savedInterview = await InterviewModel.create(interview);
@@ -365,6 +371,40 @@ export async function getInterviewsMadeGroupedByStatus(username: string) {
     }, {});
 
     return groupedInterviewsMade;
+  } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
+export async function createMeetingUrl(_id: Types.ObjectId, user: AuthenticatedUser) {
+  try {
+    const interview = await getById(_id);
+
+    if (interview.status !== InterviewStatus.Confirmed) {
+      throw ApiError.badRequest('Cannot create meeting, interview is either finished or rejected or pended');
+    }
+
+    if (!interview.isPaid) {
+      throw ApiError.badRequest('Cannot create meeting, pay first');
+    }
+
+    const [interviewer, interviewee] = await Promise.all([
+      userService.getById(interview.interviewer),
+      userService.getById(interview.interviewee),
+    ]);
+
+    if (!interviewee._id.equals(user._id)) {
+      throw ApiError.badRequest('This action must be done on behalf of the interviewee of this interview');
+    }
+
+    const meeting = await videoMeetingService.create(interview.date);
+
+    interview.meetingUrl = meeting.join_url;
+    await interview.save();
+
+    const mailOptions = await emailService.getVideoMeetingMailOptions(interviewer, interviewee, interview.meetingUrl);
+
+    await Promise.all(mailOptions.map((mailOption) => emailPublisherService.publish(mailOption)));
   } catch (error) {
     throw ApiError.from(error);
   }

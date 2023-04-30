@@ -1,10 +1,11 @@
-import * as jwt from '../utils/jwt';
 import axios, { AxiosRequestConfig } from 'axios';
+
+import * as jwt from '../utils/jwt';
 
 const GMAIL_USER = process.env.GMAIL_USER;
 const ZOOM_OAUTH2_URL = process.env.ZOOM_OAUTH2_URL;
 
-export async function create() {
+export async function create(date: Date) {
   const videoMeetingToken = await jwt.generateVideoMeetingToken();
 
   const config: AxiosRequestConfig = {
@@ -16,7 +17,7 @@ export async function create() {
       'content-type': 'application/json',
     },
     data: {
-      start_time: '2023-04-26T14:53:00', // yyyy-MM-ddTHH:mm:ss ,
+      start_time: date,
       timezone: 'EG',
       type: 2,
       settings: {

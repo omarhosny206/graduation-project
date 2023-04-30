@@ -9,6 +9,7 @@ export default interface IInterview {
   interviewee: Types.ObjectId;
   status: InterviewStatus;
   date: Date;
+  meetingUrl: string;
   info?: IInterviewInfo;
   price: number;
   isPaid: boolean;
