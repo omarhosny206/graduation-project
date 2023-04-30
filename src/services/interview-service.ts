@@ -270,12 +270,13 @@ export async function confirm(_id: Types.ObjectId, user: AuthenticatedUser) {
 export async function markAsFinished(currentDate: Date) {
   try {
     const interviews = await getAll();
+    const TWO_HOURS = 2 * 60 * 60 * 1000;
 
     const interviewsToMarkAsFinished = interviews.filter(
       (interview) =>
         interview.status == InterviewStatus.Confirmed &&
         interview.isPaid &&
-        interview.date.getTime() <= currentDate.getTime()
+        interview.date.getTime() + TWO_HOURS <= currentDate.getTime()
     );
 
     interviewsToMarkAsFinished.forEach((interview) => {
@@ -292,13 +293,14 @@ export async function markAsFinished(currentDate: Date) {
 export async function markAsRejected(currentDate: Date) {
   try {
     const interviews = await getAll();
+    const ONE_HOUR = 60 * 60 * 1000;
 
     const interviewsToMarkAsRejected = interviews.filter((interview) => {
       return (
         (interview.status == InterviewStatus.Confirmed &&
           !interview.isPaid &&
           interview.date.getTime() <= currentDate.getTime()) ||
-        (interview.status == InterviewStatus.Pending && interview.date.getTime() <= currentDate.getTime())
+        (interview.status == InterviewStatus.Pending && interview.date.getTime() + ONE_HOUR <= currentDate.getTime())
       );
     });
 

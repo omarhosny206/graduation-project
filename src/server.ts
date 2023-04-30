@@ -7,7 +7,7 @@ import apiV2 from './api-versions/api-v2';
 import { connectToDb } from './config/mongo-config';
 import * as errorHandler from './middlewares/error-handler';
 import * as notFoundHandler from './middlewares/not-found-handler';
-import { markInterviewAsFinishedCronJob, markInterviewAsRejectedCronJob } from './services/cron-service';
+import { markInterviewsAsFinishedCronJob, markInterviewsAsRejectedCronJob } from './services/cron-service';
 
 dotenv.config();
 
@@ -23,8 +23,8 @@ app.use('/api/v2', apiV2);
 app.use(notFoundHandler.handle);
 app.use(errorHandler.handle);
 
-markInterviewAsFinishedCronJob.start();
-markInterviewAsRejectedCronJob.start();
+markInterviewsAsFinishedCronJob.start();
+markInterviewsAsRejectedCronJob.start();
 
 app.listen(PORT, async () => {
   console.log('Server is running ....');
