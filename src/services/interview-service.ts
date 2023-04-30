@@ -404,7 +404,7 @@ export async function createMeetingUrl(_id: Types.ObjectId, user: AuthenticatedU
     interview.meetingUrl = meeting.join_url;
     await interview.save();
 
-    const mailOptions = await emailService.getVideoMeetingMailOptions(interviewer, interviewee, interview.meetingUrl);
+    const mailOptions = await emailService.getVideoMeetingMailOptions(interviewer, interviewee, interview);
 
     await Promise.all(mailOptions.map((mailOption) => emailPublisherService.publish(mailOption)));
   } catch (error) {

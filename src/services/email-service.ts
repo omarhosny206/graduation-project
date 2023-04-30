@@ -1,9 +1,11 @@
 import nodemailer from 'nodemailer';
 import Mail from 'nodemailer/lib/mailer';
 
+import IInterview from '../interfaces/interviews/interview-interface';
 import IUser from '../interfaces/users/user-interface';
 import ApiError from '../utils/api-error';
 import * as jwt from '../utils/jwt';
+import * as dateFormatter from '../utils/date-formatter';
 
 const GMAIL_USER = process.env.GMAIL_USER;
 const GMAIL_PASS = process.env.GMAIL_PASS;
@@ -88,10 +90,16 @@ export async function getEmailConfirmationMailOptions(email: string) {
   }
 }
 
-export async function getVideoMeetingMailOptions(interviewer: IUser, interviewee: IUser, meetingUrl: string) {
+export async function getVideoMeetingMailOptions(interviewer: IUser, interviewee: IUser, interview: IInterview) {
   try {
+    const ONE_HOUR = 60 * 60 * 1000;
+    const date = new Date(interview.date.getTime() + ONE_HOUR);
     const subject = '[Pass] Interview Video Meeting';
-    const body = `<p>Interviewer: <a href=localhost:8080/api/v1/users/${interviewer.username}> ${interviewer.username} </a></p> <p>Interviewee: <a href=localhost:8080/api/v1/users/${interviewee.username}> ${interviewee.username} </a></p> <b><a href=${meetingUrl}> Meeting URL </a></b>`;
+    const body = `<p>Interviewer: <a href="http://localhost:8080/api/v1/users/${interviewer.username}"> ${
+      interviewer.username
+    } </a></p> <p>Interviewee: <a href="http://localhost:8080/api/v1/users/${interviewee.username}"> ${
+      interviewee.username
+    } </a></p> <b><a href=${interview.meetingUrl}> Meeting URL </a></b> <p>Date: ${dateFormatter.format(date)}</p> <p>Note: you can only join the scheduled meeting five minutes prior to the starting time.</p>`;
 
     const interviewerMailOptions = { from: GMAIL_USER, to: interviewer.email, html: body, subject: subject };
     const intervieweeMailOptions = { from: GMAIL_USER, to: interviewee.email, html: body, subject: subject };

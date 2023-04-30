@@ -29,7 +29,5 @@ export async function create(date: Date) {
   };
 
   const { data: meeting } = await axios.request(config);
-  console.log(meeting);
-
   return meeting;
 }
