@@ -404,6 +404,38 @@ export async function createMeetingUrl(_id: Types.ObjectId, user: AuthenticatedU
     interview.meetingUrl = meeting.join_url;
     await interview.save();
 
+    emailService.sendVideoMeetingEmails(interviewer, interviewee, interview);
+  } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
+export async function createMeetingUrl2(_id: Types.ObjectId, user: AuthenticatedUser) {
+  try {
+    const interview = await getById(_id);
+
+    if (interview.status !== InterviewStatus.Confirmed) {
+      throw ApiError.badRequest('Cannot create meeting, interview is either finished or rejected or pended');
+    }
+
+    if (!interview.isPaid) {
+      throw ApiError.badRequest('Cannot create meeting, pay first');
+    }
+
+    const [interviewer, interviewee] = await Promise.all([
+      userService.getById(interview.interviewer),
+      userService.getById(interview.interviewee),
+    ]);
+
+    if (!interviewee._id.equals(user._id)) {
+      throw ApiError.badRequest('This action must be done on behalf of the interviewee of this interview');
+    }
+
+    const meeting = await videoMeetingService.create(interview.date);
+
+    interview.meetingUrl = meeting.join_url;
+    await interview.save();
+
     const mailOptions = await emailService.getVideoMeetingMailOptions(interviewer, interviewee, interview);
 
     await Promise.all(mailOptions.map((mailOption) => emailPublisherService.publish(mailOption)));

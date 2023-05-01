@@ -129,3 +129,14 @@ export async function createMeetingUrl(req: Request, res: Response, next: NextFu
     return next(error);
   }
 }
+
+export async function createMeetingUrl2(req: Request, res: Response, next: NextFunction) {
+  try {
+    const _id = new mongoose.Types.ObjectId(req.body._id);
+    const authenticatedUser = req.authenticatedUser;
+    await interviewService.createMeetingUrl2(_id, authenticatedUser);
+    return res.status(StatusCode.Created).json({ message: 'Meeting created.' });
+  } catch (error) {
+    return next(error);
+  }
+}
