@@ -77,8 +77,10 @@ export async function getVideoMeetingMailOptions(interviewer: IUser, interviewee
   try {
     const ONE_HOUR = 60 * 60 * 1000;
     const date = new Date(interview.date.getTime() + ONE_HOUR);
+    console.log(interview);
+    
     const subject = '[Pass] Interview Video Meeting';
-    const body = `<p>Interviewer: <a href="http://localhost:8080/api/v1/users/${interviewer.username}"> ${
+    const body = `<a href="http://localhost:8080/api/v1/interviews/${interview._id}"> Interview </a> <p>Interviewer: <a href="http://localhost:8080/api/v1/users/${interviewer.username}"> ${
       interviewer.username
     } </a></p> <p>Interviewee: <a href="http://localhost:8080/api/v1/users/${interviewee.username}"> ${
       interviewee.username
