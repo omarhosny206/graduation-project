@@ -62,10 +62,10 @@ export async function book(req: Request, res: Response, next: NextFunction) {
   }
 }
 
-export async function getById(req: Request, res: Response, next: NextFunction) {
+export async function getProfile(req: Request, res: Response, next: NextFunction) {
   try {
-    const { _id } = req.params;
-    const interview = await interviewService.getById(new mongoose.Types.ObjectId(_id));
+    const _id = new mongoose.Types.ObjectId(req.params._id);
+    const interview = await interviewService.getProfile(_id);
     return res.status(StatusCode.Ok).json(interview);
   } catch (error) {
     next(error);

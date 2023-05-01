@@ -30,7 +30,7 @@ router.post(
   validator.validate(interviewMeetingCreationSchema),
   interviewController.createMeetingUrl
 );
-router.get('/:_id', interviewController.getById);
+router.get('/:_id', interviewController.getProfile);
 router.put(
   '/:_id',
   authentication.authenticateByAccessToken,

@@ -60,6 +60,23 @@ export async function getById(_id: Types.ObjectId) {
   }
 }
 
+export async function getProfile(_id: Types.ObjectId) {
+  try {
+    const interview = await getById(_id);
+    const [interviewer, interviewee] = await Promise.all([
+      userService.getById(interview.interviewer),
+      userService.getById(interview.interviewee),
+    ]);
+    console.log(interviewer);
+    console.log(interviewee);
+
+    const interviewProfile: any = { ...interview.toObject(), interviewer: interviewer, interviewee: interviewee };
+    return interviewProfile;
+  } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
 export async function search(filterCriteria: any) {
   try {
     const fieldsToFilterBy = Object.keys(filterCriteria);
