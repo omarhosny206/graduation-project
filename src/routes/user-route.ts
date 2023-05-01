@@ -90,7 +90,7 @@ router.put(
 
 router.delete('/:_id', authentication.authenticateByAccessToken, userController.deleteById);
 
-router.put(
+router.post(
   '/email',
   authentication.authenticateByAccessToken,
   validator.validate(userUpdateEmailSchema),

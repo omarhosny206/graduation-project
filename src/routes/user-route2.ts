@@ -9,7 +9,7 @@ import userUpdateEmailSchema from '../validations/user-update-email-schema';
 const router: Router = Router();
 
 router.post('/forgot-password', validator.validate(userForgotPasswordSchema), userController.forgotPassword2);
-router.put(
+router.post(
   '/email',
   authentication.authenticateByAccessToken,
   validator.validate(userUpdateEmailSchema),
