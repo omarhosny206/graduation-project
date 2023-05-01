@@ -36,7 +36,7 @@ router.get('/:_id', authentication.authenticateByAccessToken, userController.get
 
 router.post('/email/confirmation/:emailConfirmationToken', userController.confirmEmail);
 router.post('/forgot-password', validator.validate(userForgotPasswordSchema), userController.forgotPassword);
-router.post(
+router.put(
   '/reset-password/:resetPasswordToken',
   validator.validate(userResetPasswordSchema),
   userController.resetPassword
