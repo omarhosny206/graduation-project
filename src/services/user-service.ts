@@ -30,7 +30,7 @@ export async function getAll() {
 
 export async function getAllFixed() {
   try {
-    let results: IUser[][] = await Promise.all([
+    let results = await Promise.all([
       UserModel.find({ role: Role.Interviewer, 'info.priceable': false }),
       UserModel.find({ role: Role.Interviewer, 'info.priceable': true }),
       UserModel.find({ role: Role.Interviewer, 'info.skills': { $in: ['DSA'] } }),
@@ -41,18 +41,18 @@ export async function getAllFixed() {
       results.map(async (result) => {
         let newResult = (
           await Promise.all(
-            result.map(async (value: IUser) => {
-              const interviewsMadeWithReviews = await interviewService.getInterviewsMadeWithReviews(value);
-              const rating = await getRatingForInterviewer(value, interviewsMadeWithReviews);
-              return { ...value, rating: rating };
+            result.map(async (user) => {
+              const interviewsMadeWithReviews = await interviewService.getInterviewsMadeWithReviews(user);
+              const rating = await getRatingForInterviewer(user, interviewsMadeWithReviews);
+              return { ...user.toObject(), rating: rating };
             })
           )
-        ).sort((a: any, b: any) => b.rating - a.rating);
+        ).sort((a, b) => b.rating - a.rating);
 
         if (newResult.length > 5) {
           newResult = newResult.slice(0, 5);
         }
-        return newResult.map((value: any) => ({ ...value._doc, rating: value.rating }));
+        return newResult;
       })
     );
 
@@ -99,7 +99,7 @@ export async function getProfile(username: string) {
       rating = await getRatingForInterviewee(user, interviewsWithReviews);
     }
 
-    return { ...(user as any)._doc, rating: rating };
+    return { ...user.toObject(), rating: rating };
   } catch (error) {
     throw ApiError.from(error);
   }
