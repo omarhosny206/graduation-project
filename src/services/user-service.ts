@@ -298,7 +298,7 @@ export async function updatePassword(passwordUpdate: IPasswordUpdate, user: Auth
 export async function forgotPassword(email: string) {
   try {
     const user = await getByEmail(email);
-    await emailService.sendResetPassword(email);
+    emailService.sendResetPassword(email);
   } catch (error) {
     throw ApiError.from(error);
   }
@@ -503,7 +503,7 @@ export async function checkEmailUpdate(email: string) {
     if (user) {
       throw ApiError.badRequest('This email is already taken.');
     }
-    await emailService.sendEmailUpdate(email);
+    emailService.sendEmailUpdate(email);
   } catch (error) {
     throw ApiError.from(error);
   }
