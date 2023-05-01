@@ -4,8 +4,8 @@ import Mail from 'nodemailer/lib/mailer';
 import IInterview from '../interfaces/interviews/interview-interface';
 import IUser from '../interfaces/users/user-interface';
 import ApiError from '../utils/api-error';
-import * as jwt from '../utils/jwt';
 import * as dateFormatter from '../utils/date-formatter';
+import * as jwt from '../utils/jwt';
 
 const GMAIL_USER = process.env.GMAIL_USER;
 const GMAIL_PASS = process.env.GMAIL_PASS;
@@ -23,17 +23,7 @@ const transporter = nodemailer.createTransport({
 
 export async function sendEmailConfirmation(email: string) {
   try {
-    const emailConfirmationToken = await jwt.generateEmailConfirmationToken(email);
-    const subject = '[Pass] Please confirm your email address';
-    const body = `<b>Click this <a href=http://localhost:3000/users/email/confirmation/${emailConfirmationToken}> link </a></b>`;
-
-    const mailOptions: Mail.Options = {
-      from: GMAIL_USER,
-      to: email,
-      subject: subject,
-      html: body,
-    };
-
+    const mailOptions = await getEmailConfirmationMailOptions(email);
     await transporter.sendMail(mailOptions);
   } catch (error) {
     throw ApiError.from(error);
@@ -42,17 +32,7 @@ export async function sendEmailConfirmation(email: string) {
 
 export async function sendEmailUpdate(email: string) {
   try {
-    const emailUpdateToken = await jwt.generateEmailUpdatingToken(email);
-    const subject = '[Pass] Request for email update';
-    const body = `<b>Click this <a href=${EMAIL_UPDATE_ENDPOINT}/${emailUpdateToken}> link </a></b>`;
-
-    const mailOptions: Mail.Options = {
-      from: GMAIL_USER,
-      to: email,
-      subject: subject,
-      html: body,
-    };
-
+    const mailOptions = await getEmailUpdateMailOptions(email);
     await transporter.sendMail(mailOptions);
   } catch (error) {
     throw ApiError.from(error);
@@ -61,18 +41,21 @@ export async function sendEmailUpdate(email: string) {
 
 export async function sendResetPassword(email: string) {
   try {
-    const resetPasswordToken = await jwt.generateResetPasswordToken(email);
-    const subject = '[Pass] Please reset your password';
-    const body = `<b>Click this <a href=${RESET_PASSWORD_ENDPOINT}/${resetPasswordToken}> link </a></b>`;
-
-    const mailOptions: Mail.Options = {
-      from: GMAIL_USER,
-      to: email,
-      subject: subject,
-      html: body,
-    };
-
+    const mailOptions = await getResetPasswordMailOptions(email);
     await transporter.sendMail(mailOptions);
+  } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
+export async function sendVideoMeetingEmails(interviewer: IUser, interviewee: IUser, interview: IInterview) {
+  try {
+    const [interviewerMailOptions, intervieweeMailOptions] = await getVideoMeetingMailOptions(
+      interviewer,
+      interviewee,
+      interview
+    );
+    await Promise.all([transporter.sendMail(interviewerMailOptions), transporter.sendMail(intervieweeMailOptions)]);
   } catch (error) {
     throw ApiError.from(error);
   }
@@ -99,7 +82,9 @@ export async function getVideoMeetingMailOptions(interviewer: IUser, interviewee
       interviewer.username
     } </a></p> <p>Interviewee: <a href="http://localhost:8080/api/v1/users/${interviewee.username}"> ${
       interviewee.username
-    } </a></p> <b><a href=${interview.meetingUrl}> Meeting URL </a></b> <p>Date: ${dateFormatter.format(date)}</p> <p>Note: you can only join the scheduled meeting five minutes prior to the starting time.</p>`;
+    } </a></p> <b><a href=${interview.meetingUrl}> Meeting URL </a></b> <p>Date: ${dateFormatter.format(
+      date
+    )}</p> <p>Note: you can only join the scheduled meeting five minutes prior to the starting time.</p>`;
 
     const interviewerMailOptions = { from: GMAIL_USER, to: interviewer.email, html: body, subject: subject };
     const intervieweeMailOptions = { from: GMAIL_USER, to: interviewee.email, html: body, subject: subject };
