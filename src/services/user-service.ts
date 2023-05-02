@@ -455,45 +455,53 @@ export async function isIllegibleForPricing(user: AuthenticatedUser) {
 }
 
 export async function getRatingForInterviewer(user: IUser, interviewsMadeWithReviews: IInterview[]) {
-  const interviewerRatings = interviewsMadeWithReviews.map((interview) => {
-    for (const review of interview.info?.reviews!) {
-      if (user._id.equals(review.to)) {
-        return review.rating;
+  try {
+    const interviewerRatings = interviewsMadeWithReviews.map((interview) => {
+      for (const review of interview.info?.reviews!) {
+        if (user._id.equals(review.to)) {
+          return review.rating;
+        }
       }
+    });
+
+    const ratingsSum = interviewerRatings.reduce((accumulator, currentVal) => {
+      return accumulator! + currentVal!;
+    }, 0);
+
+    if (ratingsSum === 0) {
+      return 0;
     }
-  });
 
-  const ratingsSum = interviewerRatings.reduce((accumulator, currentVal) => {
-    return accumulator! + currentVal!;
-  }, 0);
-
-  if (ratingsSum === 0) {
-    return 0;
+    const avgRating = ratingsSum! / interviewerRatings.length;
+    return avgRating;
+  } catch (error) {
+    throw ApiError.from(error);
   }
-
-  const avgRating = ratingsSum! / interviewerRatings.length;
-  return avgRating;
 }
 
 export async function getRatingForInterviewee(user: IUser, interviewsHadWithReviews: IInterview[]) {
-  const intervieweeRatings = interviewsHadWithReviews.map((interview) => {
-    for (const review of interview.info?.reviews!) {
-      if (user._id.equals(review.to)) {
-        return review.rating;
+  try {
+    const intervieweeRatings = interviewsHadWithReviews.map((interview) => {
+      for (const review of interview.info?.reviews!) {
+        if (user._id.equals(review.to)) {
+          return review.rating;
+        }
       }
+    });
+
+    const ratingsSum = intervieweeRatings.reduce((accumulator, currentVal) => {
+      return accumulator! + currentVal!;
+    }, 0);
+
+    if (ratingsSum === 0) {
+      return 0;
     }
-  });
 
-  const ratingsSum = intervieweeRatings.reduce((accumulator, currentVal) => {
-    return accumulator! + currentVal!;
-  }, 0);
-
-  if (ratingsSum === 0) {
-    return 0;
+    const avgRating = ratingsSum! / intervieweeRatings.length;
+    return avgRating;
+  } catch (error) {
+    throw ApiError.from(error);
   }
-
-  const avgRating = ratingsSum! / intervieweeRatings.length;
-  return avgRating;
 }
 
 export async function checkEmailUpdate(email: string) {

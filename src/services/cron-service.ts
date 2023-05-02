@@ -21,17 +21,25 @@ export const markInterviewsAsRejectedCronJob = new CronJob(
 );
 
 async function markInterviewsAsFinished() {
-  const currentDate = new Date(Date.now() + 1 * 60 * 60 * 1000);
-  console.log(`FINISHED time now --> ${currentDate.getHours()}:${currentDate.getMinutes()}`);
-  await interviewService.markAsFinished(currentDate);
-  console.log('FINISHED done ###');
-  console.log();
+  try {
+    const currentDate = new Date(Date.now() + 1 * 60 * 60 * 1000);
+    console.log(`FINISHED time now --> ${currentDate.getHours()}:${currentDate.getMinutes()}`);
+    await interviewService.markAsFinished(currentDate);
+    console.log('FINISHED done ###');
+    console.log();
+  } catch (error) {
+    console.log('ERROR in markInterviewsAsFinished');
+  }
 }
 
 async function markInterviewsAsRejected() {
-  const currentDate = new Date(Date.now() + 1 * 60 * 60 * 1000);
-  console.log(`REJECTED time now --> ${currentDate.getHours()}:${currentDate.getMinutes()}`);
-  await interviewService.markAsRejected(currentDate);
-  console.log('REJECTED done ###');
-  console.log();
+  try {
+    const currentDate = new Date(Date.now() + 1 * 60 * 60 * 1000);
+    console.log(`REJECTED time now --> ${currentDate.getHours()}:${currentDate.getMinutes()}`);
+    await interviewService.markAsRejected(currentDate);
+    console.log('REJECTED done ###');
+    console.log();
+  } catch (error) {
+    console.log('ERROR in markInterviewsAsRejected');
+  }
 }

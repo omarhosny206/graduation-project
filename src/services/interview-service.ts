@@ -316,7 +316,7 @@ export async function markAsRejected(currentDate: Date) {
       return (
         (interview.status == InterviewStatus.Confirmed &&
           !interview.isPaid &&
-          interview.date.getTime() <= currentDate.getTime()) ||
+          interview.date.getTime() + ONE_HOUR <= currentDate.getTime()) ||
         (interview.status == InterviewStatus.Pending && interview.date.getTime() + ONE_HOUR <= currentDate.getTime())
       );
     });
