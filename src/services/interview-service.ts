@@ -230,6 +230,7 @@ export async function book(interview: IInterview, user: AuthenticatedUser) {
     interviewee.info.interviewsHad.push(savedInterview._id);
 
     await Promise.all([interviewer.save(), interviewee.save()]);
+    handleSendingPendedInterviewEmails(savedInterview, interviewer, interviewee);
     return savedInterview;
   } catch (error) {
     throw ApiError.from(error);
@@ -254,6 +255,7 @@ export async function reject(_id: Types.ObjectId, user: AuthenticatedUser) {
 
     interview.status = InterviewStatus.Rejected;
     const updatedInterview = await interview.save();
+    handleSendingRejectedInterviewEmails(updatedInterview, user);
     return updatedInterview;
   } catch (error) {
     throw ApiError.from(error);
@@ -278,6 +280,7 @@ export async function confirm(_id: Types.ObjectId, user: AuthenticatedUser) {
 
     interview.status = InterviewStatus.Confirmed;
     const updatedInterview = await interview.save();
+    handleSendingConfirmedInterviewEmails(updatedInterview, user);
     return updatedInterview;
   } catch (error) {
     throw ApiError.from(error);
@@ -456,6 +459,38 @@ export async function createMeetingUrl2(_id: Types.ObjectId, user: Authenticated
     const mailOptions = await emailService.getVideoMeetingMailOptions(interviewer, interviewee, interview);
 
     await Promise.all(mailOptions.map((mailOption) => emailPublisherService.publish(mailOption)));
+  } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
+export async function handleSendingRejectedInterviewEmails(interview: IInterview, user: AuthenticatedUser) {
+  try {
+    if (user._id.equals(interview.interviewer)) {
+      emailService.sendRejectedInterviewEmails(user, await userService.getById(interview.interviewee), interview);
+    } else {
+      emailService.sendRejectedInterviewEmails(await userService.getById(interview.interviewer), user, interview);
+    }
+  } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
+export async function handleSendingConfirmedInterviewEmails(interview: IInterview, user: AuthenticatedUser) {
+  try {
+    emailService.sendConfirmedInterviewEmails(user, await userService.getById(interview.interviewee), interview);
+  } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
+export async function handleSendingPendedInterviewEmails(
+  interview: IInterview,
+  interviewer: IUser,
+  interviewee: IUser
+) {
+  try {
+    emailService.sendPendedInterviewEmails(interviewer, interviewee, interview);
   } catch (error) {
     throw ApiError.from(error);
   }
