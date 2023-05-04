@@ -467,9 +467,14 @@ export async function createMeetingUrl2(_id: Types.ObjectId, user: Authenticated
 export async function handleSendingRejectedInterviewEmails(interview: IInterview, user: AuthenticatedUser) {
   try {
     if (user._id.equals(interview.interviewer)) {
-      emailService.sendRejectedInterviewEmails(user, await userService.getById(interview.interviewee), interview);
+      emailService.sendRejectedInterviewEmails(user, await userService.getById(interview.interviewee), interview, true);
     } else {
-      emailService.sendRejectedInterviewEmails(await userService.getById(interview.interviewer), user, interview);
+      emailService.sendRejectedInterviewEmails(
+        await userService.getById(interview.interviewer),
+        user,
+        interview,
+        false
+      );
     }
   } catch (error) {
     throw ApiError.from(error);

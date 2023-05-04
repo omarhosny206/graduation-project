@@ -87,12 +87,18 @@ export async function sendConfirmedInterviewEmails(interviewer: IUser, interview
   }
 }
 
-export async function sendRejectedInterviewEmails(interviewer: IUser, interviewee: IUser, interview: IInterview) {
+export async function sendRejectedInterviewEmails(
+  interviewer: IUser,
+  interviewee: IUser,
+  interview: IInterview,
+  rejectedByInterviewer: boolean
+) {
   try {
     const [interviewerMailOptions, intervieweeMailOptions] = await getRejectedInterviewMailOptions(
       interviewer,
       interviewee,
-      interview
+      interview,
+      rejectedByInterviewer
     );
     await Promise.all([transporter.sendMail(interviewerMailOptions), transporter.sendMail(intervieweeMailOptions)]);
   } catch (error) {
@@ -176,14 +182,25 @@ export async function getConfirmedInterviewMailOptions(interviewer: IUser, inter
   }
 }
 
-export async function getRejectedInterviewMailOptions(interviewer: IUser, interviewee: IUser, interview: IInterview) {
+export async function getRejectedInterviewMailOptions(
+  interviewer: IUser,
+  interviewee: IUser,
+  interview: IInterview,
+  rejectedByInterviewer: boolean
+) {
   try {
     const ONE_HOUR = 60 * 60 * 1000;
     const date = new Date(interview.date.getTime() + ONE_HOUR);
     console.log(interview);
 
-    const subject = `[Pass] Interview status [REJECTED]`;
-    const body = `<a href="http://localhost:8080/api/v1/interviews/${interview._id}"> Interview </a> <p>Interviewer: <a href="http://localhost:8080/api/v1/users/${interviewer.username}"> ${interviewer.username} </a></p> <p>Interviewee: <a href="http://localhost:8080/api/v1/users/${interviewee.username}"> ${interviewee.username}`;
+    let subject = `[Pass] Interview status [REJECTED`;
+    let body = `<a href="http://localhost:8080/api/v1/interviews/${interview._id}"> Interview </a> <p>Interviewer: <a href="http://localhost:8080/api/v1/users/${interviewer.username}"> ${interviewer.username} </a></p> <p>Interviewee: <a href="http://localhost:8080/api/v1/users/${interviewee.username}"> ${interviewee.username}`;
+
+    if (rejectedByInterviewer) {
+      subject = subject.concat(' by Interviewer]');
+    } else {
+      subject = subject.concat(' by Interviewee]');
+    }
 
     const interviewerMailOptions = { from: GMAIL_USER, to: interviewer.email, html: body, subject: subject };
     const intervieweeMailOptions = { from: GMAIL_USER, to: interviewee.email, html: body, subject: subject };
