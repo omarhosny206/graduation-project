@@ -143,11 +143,12 @@ export async function getPendedInterviewMailOptions(interviewer: IUser, intervie
     const date = new Date(interview.date.getTime() + ONE_HOUR);
     console.log(interview);
 
-    const subject = `[Pass] Interview just booked with status [PENDING]`;
-    const body = `<a href="http://localhost:8080/api/v1/interviews/${interview._id}"> Interview </a> <p>Interviewer: <a href="http://localhost:8080/api/v1/users/${interviewer.username}"> ${interviewer.username} </a></p> <p>Interviewee: <a href="http://localhost:8080/api/v1/users/${interviewee.username}"> ${interviewee.username}`;
+    const subject = `[Pass] Interview has been booked with status [PENDING]`;
+    const interviewerBody = `<a href="http://localhost:8080/api/v1/interviews/${interview._id}"> Interview </a> <p>Interviewer: <a href="http://localhost:8080/api/v1/users/${interviewer.username}"> ${interviewer.username} </a></p> <p>Interviewee: <a href="http://localhost:8080/api/v1/users/${interviewee.username}"> ${interviewee.username}</a></p> <p>Note: you can either confirm or reject this interview</p>`;
+    const intervieweeBody = `<a href="http://localhost:8080/api/v1/interviews/${interview._id}"> Interview </a> <p>Interviewer: <a href="http://localhost:8080/api/v1/users/${interviewer.username}"> ${interviewer.username} </a></p> <p>Interviewee: <a href="http://localhost:8080/api/v1/users/${interviewee.username}"> ${interviewee.username}</a></p> <p>Note: you can reject this interview before the interviewer's confirmation</p>`;
 
-    const interviewerMailOptions = { from: GMAIL_USER, to: interviewer.email, html: body, subject: subject };
-    const intervieweeMailOptions = { from: GMAIL_USER, to: interviewee.email, html: body, subject: subject };
+    const interviewerMailOptions = { from: GMAIL_USER, to: interviewer.email, html: interviewerBody, subject: subject };
+    const intervieweeMailOptions = { from: GMAIL_USER, to: interviewee.email, html: intervieweeBody, subject: subject };
     return [interviewerMailOptions, intervieweeMailOptions];
   } catch (error) {
     throw ApiError.from(error);
