@@ -1,0 +1,43 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pass-interviews-app
+  labels:
+    app: pass-interviews-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: pass-interviews-app
+  template:
+    metadata:
+      labels:
+        app: pass-interviews-app
+    spec:
+      containers:
+        - name: pass-interviews-app
+          image: omarhosny102/pass-interviews-app:v1.0
+          ports:
+            - containerPort: 8080
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pass-interviews-app-service
+  labels:
+    app: pass-interviews-app
+spec:
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+      nodePort: 30016
+  selector:
+    app: pass-interviews-app
+  type: LoadBalancer
