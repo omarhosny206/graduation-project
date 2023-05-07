@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: pass-interviews-app
-          image: omarhosny102/pass-interviews-app:v1.0
+          image: omarhosny102/pass-interviews-app:v2.0
           ports:
             - containerPort: 8080
   strategy:
