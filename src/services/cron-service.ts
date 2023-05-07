@@ -6,7 +6,7 @@ const CronJob = cron.CronJob;
 
 const CRON_TIME_DIFFERENCE = Number.parseInt(process.env.CRON_TIME_DIFFERENCE!!);
 
-const CRON_JOB_EXPRESSION = '22 * * * *';
+const CRON_JOB_EXPRESSION = '1 * * * *';
 export const markInterviewsAsFinishedCronJob = new CronJob(
   CRON_JOB_EXPRESSION,
   markInterviewsAsFinished,
