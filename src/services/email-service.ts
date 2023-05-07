@@ -12,6 +12,7 @@ const GMAIL_PASS = process.env.GMAIL_PASS!!;
 const EMAIL_CONFIRMATION_ENDPOINT = process.env.EMAIL_CONFIRMATION_ENDPOINT;
 const EMAIL_UPDATE_ENDPOINT = process.env.EMAIL_UPDATE_ENDPOINT;
 const RESET_PASSWORD_ENDPOINT = process.env.RESET_PASSWORD_ENDPOINT;
+const INTERVIEW_MEETING_URL_TIME_DIFFERENCE = Number.parseInt(process.env.INTERVIEW_MEETING_URL_TIME_DIFFERENCE!!);
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
@@ -120,8 +121,7 @@ export async function getEmailConfirmationMailOptions(email: string) {
 
 export async function getVideoMeetingMailOptions(interviewer: IUser, interviewee: IUser, interview: IInterview) {
   try {
-    const ONE_HOUR = 60 * 60 * 1000;
-    const date = new Date(interview.date.getTime() + ONE_HOUR);
+    const date = new Date(interview.date.getTime() + INTERVIEW_MEETING_URL_TIME_DIFFERENCE);
     console.log(interview);
 
     const subject = '[Pass] Interview Video Meeting';
@@ -145,8 +145,6 @@ export async function getVideoMeetingMailOptions(interviewer: IUser, interviewee
 
 export async function getPendedInterviewMailOptions(interviewer: IUser, interviewee: IUser, interview: IInterview) {
   try {
-    const ONE_HOUR = 60 * 60 * 1000;
-    const date = new Date(interview.date.getTime() + ONE_HOUR);
     console.log(interview);
 
     const subject = `[Pass] Interview has been booked with status [PENDING]`;
@@ -163,8 +161,6 @@ export async function getPendedInterviewMailOptions(interviewer: IUser, intervie
 
 export async function getConfirmedInterviewMailOptions(interviewer: IUser, interviewee: IUser, interview: IInterview) {
   try {
-    const ONE_HOUR = 60 * 60 * 1000;
-    const date = new Date(interview.date.getTime() + ONE_HOUR);
     console.log(interview);
 
     const subject = `[Pass] Interview status [CONFIRMED]`;
@@ -189,8 +185,6 @@ export async function getRejectedInterviewMailOptions(
   rejectedByInterviewer: boolean
 ) {
   try {
-    const ONE_HOUR = 60 * 60 * 1000;
-    const date = new Date(interview.date.getTime() + ONE_HOUR);
     console.log(interview);
 
     let subject = `[Pass] Interview status [REJECTED`;
