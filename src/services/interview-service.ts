@@ -14,6 +14,9 @@ import * as videoMeetingService from '../services/video-meeting-service';
 import ApiError from '../utils/api-error';
 import { AuthenticatedUser } from '../utils/authenticated-user-type';
 
+const MARK_AS_REJECTED_TIME_DIFFERENCE = Number.parseInt(process.env.MARK_AS_REJECTED_TIME_DIFFERENCE!!);
+const MARK_AS_FINISHED_TIME_DIFFERENCE = Number.parseInt(process.env.MARK_AS_FINISHED_TIME_DIFFERENCE!!);
+
 export async function getAll() {
   try {
     const interviews = await InterviewModel.find();
@@ -225,6 +228,15 @@ export async function book(interview: IInterview, user: AuthenticatedUser) {
     }
 
     const savedInterview = await InterviewModel.create(interview);
+    const x = new Date();
+    console.log(savedInterview.date.getTime());
+    console.log(x.getTime());
+    console.log();
+    console.log(savedInterview.date.toLocaleTimeString());
+    console.log(x.toLocaleTimeString());
+    console.log();
+    console.log(savedInterview.date.toLocaleDateString());
+    console.log(x.toLocaleDateString());
 
     interviewer.info.interviewsMade.push(savedInterview._id);
     interviewee.info.interviewsHad.push(savedInterview._id);
@@ -290,13 +302,12 @@ export async function confirm(_id: Types.ObjectId, user: AuthenticatedUser) {
 export async function markAsFinished(currentDate: Date) {
   try {
     const interviews = await getAll();
-    const TWO_HOURS = 2 * 60 * 60 * 1000;
 
     const interviewsToMarkAsFinished = interviews.filter(
       (interview) =>
         interview.status == InterviewStatus.Confirmed &&
         interview.isPaid &&
-        interview.date.getTime() + TWO_HOURS <= currentDate.getTime()
+        interview.date.getTime() + MARK_AS_FINISHED_TIME_DIFFERENCE <= currentDate.getTime()
     );
 
     interviewsToMarkAsFinished.forEach((interview) => {
@@ -313,14 +324,13 @@ export async function markAsFinished(currentDate: Date) {
 export async function markAsRejected(currentDate: Date) {
   try {
     const interviews = await getAll();
-    const ONE_HOUR = 60 * 60 * 1000;
 
     const interviewsToMarkAsRejected = interviews.filter((interview) => {
       return (
         (interview.status == InterviewStatus.Confirmed &&
           !interview.isPaid &&
-          interview.date.getTime() + ONE_HOUR <= currentDate.getTime()) ||
-        (interview.status == InterviewStatus.Pending && interview.date.getTime() + ONE_HOUR <= currentDate.getTime())
+          interview.date.getTime() + MARK_AS_REJECTED_TIME_DIFFERENCE <= currentDate.getTime()) ||
+        (interview.status == InterviewStatus.Pending && interview.date.getTime() + MARK_AS_REJECTED_TIME_DIFFERENCE <= currentDate.getTime())
       );
     });
 

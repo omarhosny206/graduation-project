@@ -4,7 +4,9 @@ import * as interviewService from './interview-service';
 
 const CronJob = cron.CronJob;
 
-const CRON_JOB_EXPRESSION = '1 * * * *';
+const CRON_TIME_DIFFERENCE = Number.parseInt(process.env.CRON_TIME_DIFFERENCE!!);
+
+const CRON_JOB_EXPRESSION = '22 * * * *';
 export const markInterviewsAsFinishedCronJob = new CronJob(
   CRON_JOB_EXPRESSION,
   markInterviewsAsFinished,
@@ -22,7 +24,7 @@ export const markInterviewsAsRejectedCronJob = new CronJob(
 
 async function markInterviewsAsFinished() {
   try {
-    const currentDate = new Date(Date.now() + 1 * 60 * 60 * 1000);
+    const currentDate = new Date(Date.now() + CRON_TIME_DIFFERENCE);
     console.log(`FINISHED time now --> ${currentDate.getHours()}:${currentDate.getMinutes()}`);
     await interviewService.markAsFinished(currentDate);
     console.log('FINISHED done ###');
@@ -34,7 +36,7 @@ async function markInterviewsAsFinished() {
 
 async function markInterviewsAsRejected() {
   try {
-    const currentDate = new Date(Date.now() + 1 * 60 * 60 * 1000);
+    const currentDate = new Date(Date.now() + CRON_TIME_DIFFERENCE);
     console.log(`REJECTED time now --> ${currentDate.getHours()}:${currentDate.getMinutes()}`);
     await interviewService.markAsRejected(currentDate);
     console.log('REJECTED done ###');
