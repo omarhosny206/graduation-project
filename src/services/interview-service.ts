@@ -228,15 +228,6 @@ export async function book(interview: IInterview, user: AuthenticatedUser) {
     }
 
     const savedInterview = await InterviewModel.create(interview);
-    const x = new Date();
-    console.log(savedInterview.date.getTime());
-    console.log(x.getTime());
-    console.log();
-    console.log(savedInterview.date.toLocaleTimeString());
-    console.log(x.toLocaleTimeString());
-    console.log();
-    console.log(savedInterview.date.toLocaleDateString());
-    console.log(x.toLocaleDateString());
 
     interviewer.info.interviewsMade.push(savedInterview._id);
     interviewee.info.interviewsHad.push(savedInterview._id);
