@@ -12,6 +12,8 @@ const userSchema = new Schema<IUser>(
     confirmed: { type: Boolean, required: false, default: false },
     active: { type: Boolean, required: false, default: true },
     role: { type: String, required: true, enum: ALL_ROLES },
+    imageKey: { type: String, default: '' },
+    imageUrl: { type: String, default: '' },
     info: {
       type: {
         firstName: { type: String, required: true },

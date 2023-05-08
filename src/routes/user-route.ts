@@ -15,8 +15,12 @@ import userUpdateSkillsSchema from '../validations/user-update-skills-schema';
 import userUpdateSocialsSchema from '../validations/user-update-socials-schema';
 import userUpdateTimeslotsSchema from '../validations/user-update-timeslots-schema';
 import userUpdateUsernameSchema from '../validations/user-update-username-schema';
+import multer from 'multer';
 
 const router: Router = Router();
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 router.get('/', userController.getAll);
 router.get('/fixed', userController.getAllFixed);
@@ -34,6 +38,7 @@ router.get('/interviews-had/:username', userController.getInterviewsHad);
 router.get('/:username', userController.getProfile);
 router.get('/:_id', authentication.authenticateByAccessToken, userController.getById);
 
+router.post('/image', authentication.authenticateByAccessToken, upload.single('image'), userController.saveImage);
 router.post('/email/confirmation/:emailConfirmationToken', userController.confirmEmail);
 router.post('/forgot-password', validator.validate(userForgotPasswordSchema), userController.forgotPassword);
 router.put(
@@ -88,6 +93,7 @@ router.put(
   userController.updatePassword
 );
 
+router.delete('/image', authentication.authenticateByAccessToken, userController.deleteImage);
 router.delete('/:_id', authentication.authenticateByAccessToken, userController.deleteById);
 
 router.post(

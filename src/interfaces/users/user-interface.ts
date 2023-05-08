@@ -11,4 +11,6 @@ export default interface IUser {
   active: boolean;
   role: Role;
   info?: IUserInfo;
+  imageKey: string;
+  imageUrl: string;
 }

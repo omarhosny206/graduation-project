@@ -8,6 +8,7 @@ import ITimeslot from '../interfaces/users/timeslot-interface';
 import IUserInfo from '../interfaces/users/user-info-interface';
 import * as notificationService from '../services/notification-service';
 import * as userService from '../services/user-service';
+import * as imageService from '../services/image-service';
 
 export async function getAll(req: Request, res: Response, next: NextFunction) {
   try {
@@ -198,16 +199,14 @@ export async function getInterviewsMade(req: Request, res: Response, next: NextF
 }
 
 export async function getInterviewsMadeGroupedByStatus(req: Request, res: Response, next: NextFunction) {
-    try {
-        const authenticatedUser = req.authenticatedUser;
-      const groupedInterviewsMade = await userService.getInterviewsMadeGroupedByStatus(authenticatedUser);
-      return res.status(StatusCode.Ok).json(groupedInterviewsMade);
-    } catch (error) {
-      return next(error);
-    }
+  try {
+    const authenticatedUser = req.authenticatedUser;
+    const groupedInterviewsMade = await userService.getInterviewsMadeGroupedByStatus(authenticatedUser);
+    return res.status(StatusCode.Ok).json(groupedInterviewsMade);
+  } catch (error) {
+    return next(error);
   }
-  
- 
+}
 
 export async function getInterviewsHad(req: Request, res: Response, next: NextFunction) {
   try {
@@ -220,14 +219,14 @@ export async function getInterviewsHad(req: Request, res: Response, next: NextFu
 }
 
 export async function getInterviewsHadGroupedByStatus(req: Request, res: Response, next: NextFunction) {
-    try {
-        const authenticatedUser = req.authenticatedUser;
-      const groupedInterviewsHad = await userService.getInterviewsHadGroupedByStatus(authenticatedUser);
-      return res.status(StatusCode.Ok).json(groupedInterviewsHad);
-    } catch (error) {
-      return next(error);
-    }
+  try {
+    const authenticatedUser = req.authenticatedUser;
+    const groupedInterviewsHad = await userService.getInterviewsHadGroupedByStatus(authenticatedUser);
+    return res.status(StatusCode.Ok).json(groupedInterviewsHad);
+  } catch (error) {
+    return next(error);
   }
+}
 
 export async function requestEmailUpdate(req: Request, res: Response, next: NextFunction) {
   try {
@@ -264,6 +263,28 @@ export async function notify(req: Request, res: Response, next: NextFunction) {
   try {
     const data = await notificationService.notify();
     return res.json(data);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function saveImage(req: Request, res: Response, next: NextFunction) {
+  try {
+    const authenticatedUser = req.authenticatedUser;
+    const fileBuffer = req.file?.buffer!!;
+    const contentType = req.file?.mimetype!!;
+    const updatedUser = await imageService.upload(authenticatedUser, fileBuffer, contentType);
+    return res.json(updatedUser);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function deleteImage(req: Request, res: Response, next: NextFunction) {
+  try {
+    const authenticatedUser = req.authenticatedUser;
+    const updatedUser = await imageService.remove(authenticatedUser);
+    return res.json(updatedUser);
   } catch (error) {
     next(error);
   }
