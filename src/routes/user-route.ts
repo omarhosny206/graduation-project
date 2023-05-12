@@ -4,7 +4,7 @@ import * as userController from '../controllers/user-controller';
 import { Role } from '../enums/role-enum';
 import * as authentication from '../middlewares/authentication';
 import * as authorization from '../middlewares/authorization';
-import { uploadImageMiddleware } from '../middlewares/multer';
+import { multerUploadImage } from '../middlewares/multer';
 import * as validator from '../middlewares/validator';
 import userForgotPasswordSchema from '../validations/user-forgot-password-schema';
 import userInfoSchema from '../validations/user-info-schema';
@@ -36,7 +36,7 @@ router.get('/interviews-had/:username', userController.getInterviewsHad);
 router.get('/:username', userController.getProfile);
 router.get('/:_id', authentication.authenticateByAccessToken, userController.getById);
 
-router.post('/image', authentication.authenticateByAccessToken, uploadImageMiddleware, userController.saveImage);
+router.post('/image', authentication.authenticateByAccessToken, multerUploadImage, userController.saveImage);
 router.post('/email/confirmation/:emailConfirmationToken', userController.confirmEmail);
 router.post('/forgot-password', validator.validate(userForgotPasswordSchema), userController.forgotPassword);
 router.put(
