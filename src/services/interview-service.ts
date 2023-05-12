@@ -29,7 +29,7 @@ export async function getAll() {
 export async function getInterviewsHad(username: string) {
   try {
     const user = await userService.getByUserName(username);
-    const interviewsHad = await InterviewModel.find({ interviewee: user._id });
+    const interviewsHad = await InterviewModel.find({ interviewee: user._id }).populate("interviewer interviewee");
     return interviewsHad;
   } catch (error) {
     throw ApiError.from(error);
@@ -42,7 +42,7 @@ export async function getInterviewsMade(username: string) {
     if (user.role === Role.Interviewee) {
       throw ApiError.badRequest('Cannot get interviews made, interviewee role is not allowed to make interviews');
     }
-    const interviewsHad = await InterviewModel.find({ interviewer: user._id });
+    const interviewsHad = await InterviewModel.find({ interviewer: user._id }).populate("interviewer interviewee");
     return interviewsHad;
   } catch (error) {
     throw ApiError.from(error);
