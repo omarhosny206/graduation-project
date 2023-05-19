@@ -10,7 +10,10 @@ services:
       - "8080:8080"
     networks:
       - app-network
+      - rabbitmq_go_net
       
 networks:
   app-network:
+    driver: bridge
+  rabbitmq_go_net:
     driver: bridge
