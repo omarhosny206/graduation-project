@@ -13,7 +13,7 @@ const RABBITMQ_ROUTING_KEY: string = process.env.RABBITMQ_ROUTING_KEY!!;
 
 async function connect() {
   try {
-    const connection: Connection = await client.connect('amqp://root:password@localhost:5672');
+    const connection: Connection = await client.connect('amqp://root:password@rabbitmq:5672');
 
     const channel: Channel = await connection.createChannel();
 
