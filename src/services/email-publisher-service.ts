@@ -10,10 +10,12 @@ const RABBITMQ_EXCHANGE_TYPE: string = process.env.RABBITMQ_EXCHANGE_TYPE!!;
 const RABBITMQ_QUEUE_NAME: string = process.env.RABBITMQ_QUEUE_NAME!!;
 const RABBITMQ_BINDING_KEY: string = process.env.RABBITMQ_BINDING_KEY!!;
 const RABBITMQ_ROUTING_KEY: string = process.env.RABBITMQ_ROUTING_KEY!!;
+const RABBITMQ_CONNECTION_URL_EC2 = process.env.RABBITMQ_CONNECTION_URL_EC2!!;
+const RABBITMQ_CONNECTION_URL_MQ = process.env.RABBITMQ_CONNECTION_URL_MQ!!;
 
 async function connect() {
   try {
-    const connection: Connection = await client.connect('amqp://root:password@rabbitmq:5672');
+    const connection: Connection = await client.connect(RABBITMQ_CONNECTION_URL_MQ);
 
     const channel: Channel = await connection.createChannel();
 
