@@ -1,6 +1,7 @@
 import axios from 'axios';
 import qs from 'qs';
 import ApiError from '../utils/api-error';
+import { AuthenticatedUser } from '../utils/authenticated-user-type';
 
 const baseURL = {
   sandbox: 'https://api-m.sandbox.paypal.com',
@@ -22,5 +23,49 @@ export async function generateAccessToken() {
     return accessToken;
   } catch (error) {
     ApiError.badRequest(error);
+  }
+}
+
+export async function onboardUser() {
+  try {
+    const accessToken = await generateAccessToken();
+    const url = `${baseURL.sandbox}/v2/customer/partner-referrals`;
+    const body = {
+      operations: [
+        {
+          operation: 'API_INTEGRATION',
+          api_integration_preference: {
+            rest_api_integration: {
+              integration_method: 'PAYPAL',
+              integration_type: 'THIRD_PARTY',
+              third_party_details: {
+                features: ['PAYMENT', 'REFUND'],
+              },
+            },
+          },
+        },
+      ],
+      products: ['EXPRESS_CHECKOUT'],
+      legal_consents: [
+        {
+          type: 'SHARE_DATA_CONSENT',
+          granted: true,
+        },
+      ],
+      partner_config_override: {
+        partner_logo_url: 'https://www.paypalobjects.com/webstatic/mktg/logo/pp_cc_mark_111x69.jpg',
+        return_url: 'http://localhost:8080/payment/finish-onboard',
+        return_url_description: 'the url to return the merchant after the paypal onboarding process.',
+        show_add_credit_card: true,
+      },
+    };
+    const headers = {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${accessToken}`,
+    };
+    const { data } = await axios.post(url, body, { headers: headers });
+    return data;
+  } catch (error) {
+    throw ApiError.from(error);
   }
 }
