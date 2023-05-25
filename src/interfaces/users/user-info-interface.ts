@@ -16,4 +16,5 @@ export default interface IUserInfo {
   skills?: string[];
   socials?: ISocials;
   timeslots: ITimeslot[];
+  merchantId?: string;
 }

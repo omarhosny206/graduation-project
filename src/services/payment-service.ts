@@ -1,7 +1,10 @@
 import axios from 'axios';
+
 import qs from 'qs';
+
 import ApiError from '../utils/api-error';
 import { AuthenticatedUser } from '../utils/authenticated-user-type';
+import * as userService from './user-service';
 
 const baseURL = {
   sandbox: 'https://api-m.sandbox.paypal.com',
@@ -65,6 +68,15 @@ export async function onboardUser() {
     };
     const { data } = await axios.post(url, body, { headers: headers });
     return data;
+  } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
+export async function finishOnboarding(user: AuthenticatedUser, merchantId: string) {
+  try {
+    const updatedUser = await userService.saveMerchantId(user, merchantId);
+    return updatedUser;
   } catch (error) {
     throw ApiError.from(error);
   }
