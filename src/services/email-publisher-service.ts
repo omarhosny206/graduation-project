@@ -15,12 +15,12 @@ const RABBITMQ_CONNECTION_URL_MQ = process.env.RABBITMQ_CONNECTION_URL_MQ!!;
 
 async function connect() {
   try {
-    const connection: Connection = await client.connect(RABBITMQ_CONNECTION_URL_MQ);
+    const connection: Connection = await client.connect(RABBITMQ_CONNECTION_URL_EC2);
 
     const channel: Channel = await connection.createChannel();
 
     await channel.assertExchange(RABBITMQ_EXCHANGE_NAME, RABBITMQ_EXCHANGE_TYPE);
-    await channel.assertQueue(RABBITMQ_QUEUE_NAME);
+    await channel.assertQueue(RABBITMQ_QUEUE_NAME, { durable: true });
     await channel.bindQueue(RABBITMQ_QUEUE_NAME, RABBITMQ_EXCHANGE_NAME, RABBITMQ_BINDING_KEY);
 
     return channel;
@@ -36,7 +36,8 @@ export async function publish(message: any) {
     const messageIsSent = channel.publish(
       RABBITMQ_EXCHANGE_NAME,
       RABBITMQ_ROUTING_KEY,
-      Buffer.from(JSON.stringify(message))
+      Buffer.from(JSON.stringify(message)),
+      { persistent: true }
     );
 
     if (messageIsSent) {
