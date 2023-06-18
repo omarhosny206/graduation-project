@@ -276,6 +276,11 @@ export async function confirm(_id: Types.ObjectId, user: AuthenticatedUser) {
     interview.status = InterviewStatus.Confirmed;
     const updatedInterview = await interview.save();
     handleSendingConfirmedInterviewEmails(updatedInterview, user);
+
+    if (interview.isPaid) {
+      emailService.sendVideoMeetingEmails(user, await userService.getById(interview.interviewee), interview);
+    }
+
     return updatedInterview;
   } catch (error) {
     throw ApiError.from(error);
