@@ -29,7 +29,7 @@ export async function getAll() {
 export async function getInterviewsHad(username: string) {
   try {
     const user = await userService.getByUserName(username);
-    const interviewsHad = await InterviewModel.find({ interviewee: user._id }).populate("interviewer interviewee");
+    const interviewsHad = await InterviewModel.find({ interviewee: user._id }).populate('interviewer interviewee');
     return interviewsHad;
   } catch (error) {
     throw ApiError.from(error);
@@ -42,7 +42,7 @@ export async function getInterviewsMade(username: string) {
     if (user.role === Role.Interviewee) {
       throw ApiError.badRequest('Cannot get interviews made, interviewee role is not allowed to make interviews');
     }
-    const interviewsHad = await InterviewModel.find({ interviewer: user._id }).populate("interviewer interviewee");
+    const interviewsHad = await InterviewModel.find({ interviewer: user._id }).populate('interviewer interviewee');
     return interviewsHad;
   } catch (error) {
     throw ApiError.from(error);
@@ -65,7 +65,7 @@ export async function getById(_id: Types.ObjectId) {
 
 export async function getProfile(_id: Types.ObjectId) {
   try {
-    const interview = await InterviewModel.findById(_id).populate("interviewer interviewee");
+    const interview = await InterviewModel.findById(_id).populate('interviewer interviewee');
     return interview;
   } catch (error) {
     throw ApiError.from(error);
@@ -217,6 +217,7 @@ export async function book(interview: IInterview, user: AuthenticatedUser) {
     interview.price = interviewer.info.price;
     if (interview.price === 0) {
       interview.isPaid = true;
+      emailService.sendVideoMeetingEmails(interviewer, interviewee, interview);
     }
 
     const savedInterview = await InterviewModel.create(interview);
@@ -313,7 +314,8 @@ export async function markAsRejected(currentDate: Date) {
         (interview.status == InterviewStatus.Confirmed &&
           !interview.isPaid &&
           interview.date.getTime() + MARK_AS_REJECTED_TIME_DIFFERENCE <= currentDate.getTime()) ||
-        (interview.status == InterviewStatus.Pending && interview.date.getTime() + MARK_AS_REJECTED_TIME_DIFFERENCE <= currentDate.getTime())
+        (interview.status == InterviewStatus.Pending &&
+          interview.date.getTime() + MARK_AS_REJECTED_TIME_DIFFERENCE <= currentDate.getTime())
       );
     });
 
