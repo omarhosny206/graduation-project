@@ -217,7 +217,7 @@ export async function updatePrice(user: AuthenticatedUser, price: number) {
       throw ApiError.badRequest('User info is required');
     }
 
-    if (!(await isIllegibleForPricing(user))) {
+    if (!user.info.priceable && !(await isIllegibleForPricing(user))) {
       throw ApiError.badRequest('Cannot update price, user is not illegible for pricing');
     }
 
