@@ -4,7 +4,6 @@ import ITimeslot from './timeslot-interface';
 import { LevelOfExperience } from '../../enums/level-of-experience-enum';
 
 export default interface IUserInfo {
-  _id: Types.ObjectId;
   firstName: string;
   lastName: string;
   bio?: string;
