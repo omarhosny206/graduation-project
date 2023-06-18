@@ -274,10 +274,11 @@ export async function confirm(_id: Types.ObjectId, user: AuthenticatedUser) {
     }
 
     interview.status = InterviewStatus.Confirmed;
-    const updatedInterview = await interview.save();
+    let updatedInterview = await interview.save();
     handleSendingConfirmedInterviewEmails(updatedInterview, user);
 
     if (interview.isPaid) {
+      updatedInterview = await createMeetingUrl(_id, user);
       emailService.sendVideoMeetingEmails(user, await userService.getById(interview.interviewee), interview);
     }
 
@@ -421,9 +422,10 @@ export async function createMeetingUrl(_id: Types.ObjectId, user: AuthenticatedU
     const meeting = await videoMeetingService.create(interview.date);
 
     interview.meetingUrl = meeting.join_url;
-    await interview.save();
+    const updatedInterview = await interview.save();
 
     emailService.sendVideoMeetingEmails(interviewer, interviewee, interview);
+    return updatedInterview;
   } catch (error) {
     throw ApiError.from(error);
   }
@@ -453,11 +455,12 @@ export async function createMeetingUrl2(_id: Types.ObjectId, user: Authenticated
     const meeting = await videoMeetingService.create(interview.date);
 
     interview.meetingUrl = meeting.join_url;
-    await interview.save();
+    const updatedInterview = await interview.save();
 
     const mailOptions = await emailService.getVideoMeetingMailOptions(interviewer, interviewee, interview);
 
     await Promise.all(mailOptions.map((mailOption) => emailPublisherService.publish(mailOption)));
+    return updatedInterview;
   } catch (error) {
     throw ApiError.from(error);
   }
