@@ -217,7 +217,6 @@ export async function book(interview: IInterview, user: AuthenticatedUser) {
     interview.price = interviewer.info.price;
     if (interview.price === 0) {
       interview.isPaid = true;
-      emailService.sendVideoMeetingEmails(interviewer, interviewee, interview);
     }
 
     const savedInterview = await InterviewModel.create(interview);
