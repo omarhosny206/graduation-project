@@ -220,6 +220,10 @@ export async function book(interview: IInterview, user: AuthenticatedUser) {
       throw ApiError.badRequest('Cannot save interview, you are not a member in this interview');
     }
 
+    if (interview.interviewer.equals(interview.interviewee)) {
+      throw ApiError.badRequest('Cannot save interview, you are not allowed to make an interview with yourself');
+    }
+
     interview.price = interviewer.info.price;
     if (interview.price === 0) {
       interview.isPaid = true;
