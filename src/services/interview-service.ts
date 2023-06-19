@@ -67,6 +67,11 @@ export async function getById(_id: Types.ObjectId) {
 export async function getProfile(_id: Types.ObjectId) {
   try {
     const interview = await InterviewModel.findById(_id).populate('interviewer interviewee');
+
+    if (!interview) {
+      throw ApiError.badRequest('interview not found with this id');
+    }
+
     return interview;
   } catch (error) {
     throw ApiError.from(error);
