@@ -246,12 +246,12 @@ export async function reject(_id: Types.ObjectId, user: AuthenticatedUser) {
   try {
     const interview = await getById(_id);
 
-    if (interview.status === InterviewStatus.Rejected) {
-      return interview;
-    }
-
     if (!user._id.equals(interview.interviewer) && !user._id.equals(interview.interviewee)) {
       throw ApiError.badRequest('Cannot reject interview, you are not a member in this interview');
+    }
+
+    if (interview.status === InterviewStatus.Rejected) {
+      return interview;
     }
 
     if (interview.status !== InterviewStatus.Pending) {
