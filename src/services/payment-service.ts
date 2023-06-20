@@ -5,6 +5,7 @@ import qs from 'qs';
 import ApiError from '../utils/api-error';
 import { AuthenticatedUser } from '../utils/authenticated-user-type';
 import * as userService from './user-service';
+import IInterview from '../interfaces/interviews/interview-interface';
 
 const baseURL = {
   sandbox: 'https://api-m.sandbox.paypal.com',
@@ -77,6 +78,53 @@ export async function finishOnboarding(user: AuthenticatedUser, merchantId: stri
   try {
     const updatedUser = await userService.saveMerchantId(user, merchantId);
     return updatedUser;
+  } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
+export async function createOrder(interview: IInterview) {
+  try {
+    const accessToken = await generateAccessToken();
+    const url = `${baseURL.sandbox}/v2/checkout/orders`;
+    const body = {
+      intent: 'CAPTURE',
+      purchase_units: [
+        {
+          amount: {
+            currency_code: 'USD',
+            // value: interview.price.toFixed(2).toString(),
+            value: '100.00',
+          },
+          payment_instruction: {
+            disbursement_mode: 'INSTANT',
+            platform_fees: [
+              {
+                amount: {
+                  currency_code: 'USD',
+                  value: '25.00',
+                },
+              },
+            ],
+          },
+        },
+      ],
+    };
+    const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` };
+    const { data } = await axios.post(url, body, { headers: headers });
+    return data;
+  } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
+export async function capturePayment(orderId: string) {
+  try {
+    const accessToken = await generateAccessToken();
+    const url = `${baseURL.sandbox}/v2/checkout/orders/${orderId}/capture`;
+    const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` };
+    const { data } = await axios.post(url, {}, { headers: headers });
+    return data;
   } catch (error) {
     throw ApiError.from(error);
   }
