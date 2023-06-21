@@ -150,6 +150,11 @@ export async function search(searchCriteria: any) {
         },
       },
       {
+        $match: {
+          'role': { $eq: Role.Interviewer },
+        },
+      },
+      {
         $project: {
           score: { $meta: 'searchScore' },
           document: '$$ROOT',
