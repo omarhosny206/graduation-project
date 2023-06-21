@@ -11,7 +11,7 @@ pipeline {
       
        stage("Run Docker Compose") {
             steps {
-                sh "docker compose -f /var/jenkins_home/app/graduation-project/docker-compose-dev.yml up -d --build"
+                sh "docker compose -f /var/jenkins_home/app/graduation-project/docker-compose-dev2.yml up -d --build"
             }
         }
     }
