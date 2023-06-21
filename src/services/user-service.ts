@@ -114,7 +114,6 @@ export async function search(searchCriteria: any) {
         .split(',')
         .map((value: string) => value.trim())
         .filter((value: string) => value.length);
-      console.log(queries);
 
       const multipleValuesFilters = queries.map((value: string) => ({
         text: {
@@ -129,7 +128,6 @@ export async function search(searchCriteria: any) {
 
     if (searchCriteria['fullTextSearch']) {
       const query = searchCriteria['fullTextSearch'];
-      console.log(query);
 
       const fullTextSearchFilter = {
         text: {
@@ -141,8 +139,6 @@ export async function search(searchCriteria: any) {
 
       filters.push(fullTextSearchFilter);
     }
-
-    console.log(filters);
 
     let users = await UserModel.aggregate([
       {
@@ -161,20 +157,17 @@ export async function search(searchCriteria: any) {
       },
     ]).sort({ score: -1, 'document.info.price': 1 });
 
+    users = users.filter((user) => user.document.role === Role.Interviewer);
+
     users = await Promise.all(
       users
         .map((user) => ({ _id: user._id, score: user.score, ...user.document }))
         .map(async (user) => {
           const interviewsMadeWithReviews = await interviewService.getInterviewsMadeWithReviews(user);
           const rating = await getRatingForInterviewer(user, interviewsMadeWithReviews);
-          console.log('rating:', rating);
-          console.log('new:', { ...user, rating: rating });
-
           return { ...user, rating: rating };
         })
     );
-
-    console.log('USERS:', users);
 
     return users;
   } catch (error) {
