@@ -162,8 +162,6 @@ export async function search(searchCriteria: any) {
       },
     ]).sort({ score: -1, 'document.info.price': 1 });
 
-    users = users.filter((user) => user.document.role === Role.Interviewer);
-
     users = await Promise.all(
       users
         .map((user) => ({ _id: user._id, score: user.score, ...user.document }))
