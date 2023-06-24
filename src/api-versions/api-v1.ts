@@ -14,6 +14,6 @@ router.use('/signin', signinRoute);
 router.use('/users', userRoute);
 router.use('/interviews', interviewRoute);
 router.use('/token', expiredAccessTokenHandlerRoute);
-router.use('/payment', paymentRoute);
+router.use('/payments', paymentRoute);
 
 export default router;
