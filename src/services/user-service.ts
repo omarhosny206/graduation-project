@@ -213,7 +213,7 @@ export async function updatePrice(user: AuthenticatedUser, price: number) {
       throw ApiError.badRequest('User info is required');
     }
 
-    if (!user.info.priceable && !(await isIllegibleForPricing(user))) {
+    if (!user.info.priceable && !(await isEligibleForPricing(user))) {
       throw ApiError.badRequest('Cannot update price, user is not illegible for pricing');
     }
 
@@ -435,7 +435,7 @@ export async function requestPricingEligibility(user: AuthenticatedUser) {
       return user;
     }
 
-    const isEligible = await isIllegibleForPricing(user);
+    const isEligible = await isEligibleForPricing(user);
 
     if (!isEligible) {
       throw ApiError.badRequest(`Not eligible, you must at least pass 60% of all interviews' ratings`);
@@ -449,7 +449,7 @@ export async function requestPricingEligibility(user: AuthenticatedUser) {
   }
 }
 
-export async function isIllegibleForPricing(user: AuthenticatedUser) {
+export async function isEligibleForPricing(user: AuthenticatedUser) {
   try {
     if (user.info?.priceable) {
       return true;
