@@ -45,6 +45,7 @@ const userSchema = new Schema<IUser>(
           required: false,
           _id: false,
         },
+        merchantId: { type: String, required: false },
       },
       required: false,
       _id: false,
