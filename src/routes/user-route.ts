@@ -19,7 +19,6 @@ import userUpdateUsernameSchema from '../validations/user-update-username-schema
 
 const router: Router = Router();
 
-
 router.get('/', userController.getAll);
 router.get('/fixed', userController.getAllFixed);
 router.get('/notify', userController.notify);
@@ -36,6 +35,12 @@ router.get('/interviews-had/:username', userController.getInterviewsHad);
 router.get('/:username', userController.getProfile);
 router.get('/:_id', authentication.authenticateByAccessToken, userController.getById);
 
+router.post(
+  '/pricing',
+  authentication.authenticateByAccessToken,
+  authorization.authorizeByRole(Role.Interviewer),
+  userController.requestPricingEligibility
+);
 router.post('/image', authentication.authenticateByAccessToken, multerUploadImage, userController.saveImage);
 router.post('/email/confirmation/:emailConfirmationToken', userController.confirmEmail);
 router.post('/forgot-password', validator.validate(userForgotPasswordSchema), userController.forgotPassword);

@@ -425,6 +425,30 @@ export async function getInterviewsMadeGroupedByStatus(user: AuthenticatedUser) 
   }
 }
 
+export async function requestPricingEligibility(user: AuthenticatedUser) {
+  try {
+    if (!user.info) {
+      throw ApiError.badRequest('user info is required.');
+    }
+
+    if (user.info.priceable) {
+      return user;
+    }
+
+    const isEligible = await isIllegibleForPricing(user);
+
+    if (!isEligible) {
+      throw ApiError.badRequest(`Not eligible, you must at least pass 60% of all interviews' ratings`);
+    }
+
+    user.info.priceable = true;
+    const updatedUser = await user.save();
+    return updatedUser;
+  } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
 export async function isIllegibleForPricing(user: AuthenticatedUser) {
   try {
     if (user.info?.priceable) {

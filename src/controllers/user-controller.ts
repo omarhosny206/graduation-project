@@ -6,9 +6,9 @@ import IPasswordReset from '../interfaces/users/password-reset-interface';
 import IPasswordUpdate from '../interfaces/users/password-update-interface';
 import ITimeslot from '../interfaces/users/timeslot-interface';
 import IUserInfo from '../interfaces/users/user-info-interface';
+import * as imageService from '../services/image-service';
 import * as notificationService from '../services/notification-service';
 import * as userService from '../services/user-service';
-import * as imageService from '../services/image-service';
 
 export async function getAll(req: Request, res: Response, next: NextFunction) {
   try {
@@ -256,6 +256,16 @@ export async function updateEmail(req: Request, res: Response, next: NextFunctio
     return res.status(StatusCode.Ok).json(signinResponse);
   } catch (error) {
     next(error);
+  }
+}
+
+export async function requestPricingEligibility(req: Request, res: Response, next: NextFunction) {
+  try {
+    const authenticatedUser = req.authenticatedUser;
+    const updatedUser = await userService.requestPricingEligibility(authenticatedUser);
+    return res.status(StatusCode.Ok).json(updatedUser);
+  } catch (error) {
+    return next(error);
   }
 }
 
