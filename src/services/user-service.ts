@@ -576,10 +576,6 @@ export async function existsByUsername(username: string) {
 
 export async function saveMerchantId(user: AuthenticatedUser, merchantId: string) {
   try {
-    if (user.role !== Role.Interviewer) {
-      throw ApiError.forbidden('Interviewees are not allowed to this action.');
-    }
-
     if (!user.info) {
       throw ApiError.badRequest('user info is required.');
     }
