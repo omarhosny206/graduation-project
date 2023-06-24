@@ -5,6 +5,7 @@ import interviewRoute from '../routes/interview-route';
 import signinRoute from '../routes/signin-route';
 import signupRoute from '../routes/signup-route';
 import userRoute from '../routes/user-route';
+import paymentRoute from '../routes/payment-route';
 
 const router: Router = Router();
 
@@ -13,5 +14,6 @@ router.use('/signin', signinRoute);
 router.use('/users', userRoute);
 router.use('/interviews', interviewRoute);
 router.use('/token', expiredAccessTokenHandlerRoute);
+router.use('/payment', paymentRoute);
 
 export default router;
