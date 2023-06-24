@@ -6,13 +6,14 @@ import ApiError from '../utils/api-error';
 import { AuthenticatedUser } from '../utils/authenticated-user-type';
 import * as userService from './user-service';
 import IInterview from '../interfaces/interviews/interview-interface';
+import { ObjectId } from 'mongoose';
 
 const baseURL = {
   sandbox: 'https://api-m.sandbox.paypal.com',
   production: 'https://api-m.paypal.com',
 };
 
-export async function generateAccessToken() {
+async function generateAccessToken() {
   try {
     const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID;
     const PAYPAL_SECRET = process.env.PAYPAL_SECRET;
@@ -58,7 +59,7 @@ export async function onboardUser() {
       ],
       partner_config_override: {
         partner_logo_url: 'https://www.paypalobjects.com/webstatic/mktg/logo/pp_cc_mark_111x69.jpg',
-        return_url: 'http://localhost:8080/payment/finish-onboard',
+        return_url: 'http://localhost:8080/api/v1/payment/onboard/finish', // needs to be changed
         return_url_description: 'the url to return the merchant after the paypal onboarding process.',
         show_add_credit_card: true,
       },
@@ -87,22 +88,38 @@ export async function createOrder(interview: IInterview) {
   try {
     const accessToken = await generateAccessToken();
     const url = `${baseURL.sandbox}/v2/checkout/orders`;
+
     const body = {
       intent: 'CAPTURE',
       purchase_units: [
         {
           amount: {
             currency_code: 'USD',
-            // value: interview.price.toFixed(2).toString(),
-            value: '100.00',
+            value: interview.price.toFixed(2).toString(),
+            breakdown:{
+              item_total: {
+                currency_code: 'USD',
+                value: interview.price.toFixed(2).toString(),
+              }
+            }
           },
+          items: [
+            {
+              name: `Interview on ${interview.date.getDay() + 1}/${interview.date.getMonth() + 1}/${interview.date.getFullYear()} ${interview.date.getHours() + 1}:${interview.date.getMinutes().toFixed(2)}`,
+              quantity: '1',
+              unit_amount: {
+                currency_code: 'USD',
+                value: interview.price.toFixed(2).toString(),
+              }
+            },
+          ],
           payment_instruction: {
             disbursement_mode: 'INSTANT',
             platform_fees: [
               {
                 amount: {
                   currency_code: 'USD',
-                  value: '25.00',
+                  value: (interview.price * 0.05).toFixed(2).toString(),
                 },
               },
             ],
