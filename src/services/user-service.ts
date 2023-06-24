@@ -151,7 +151,7 @@ export async function search(searchCriteria: any) {
       },
       {
         $match: {
-          'role': { $eq: Role.Interviewer },
+          role: { $eq: Role.Interviewer },
         },
       },
       {
@@ -213,8 +213,8 @@ export async function updatePrice(user: AuthenticatedUser, price: number) {
       throw ApiError.badRequest('User info is required');
     }
 
-    if (!user.info.priceable && !(await isEligibleForPricing(user))) {
-      throw ApiError.badRequest('Cannot update price, user is not illegible for pricing');
+    if (!user.info.priceable) {
+      throw ApiError.badRequest('Cannot update price, you are not priceable, request pricing eligibility');
     }
 
     user.info.price = price;
@@ -458,7 +458,7 @@ export async function isEligibleForPricing(user: AuthenticatedUser) {
     const interviewsMadeWithReviews = await interviewService.getInterviewsMadeWithReviews(user);
 
     if (interviewsMadeWithReviews.length < 3) {
-      throw ApiError.badRequest('Not illegible, you must have at least 3 finished interviews with ratings');
+      throw ApiError.badRequest('Not eligible, you must have at least 3 finished interviews with ratings');
     }
 
     const rating: number = await getRatingForInterviewer(user, interviewsMadeWithReviews);
