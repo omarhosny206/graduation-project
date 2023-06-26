@@ -126,11 +126,14 @@ export async function getById(req: Request, res: Response, next: NextFunction) {
   }
 }
 
-export async function deleteById(req: Request, res: Response, next: NextFunction) {
+export async function deleteAccount(req: Request, res: Response, next: NextFunction) {
   try {
-    const { _id } = req.params;
-    await userService.deleteById(new Types.ObjectId(_id));
-    return res.status(StatusCode.Ok).json({ message: 'success' });
+    const authenticatedUser = req.authenticatedUser;
+    const { email } = req.body;
+    console.log('delete account');
+    console.log(authenticatedUser);
+    await userService.deleteAccount(authenticatedUser, email);
+    return res.status(StatusCode.Accepted).json({ message: 'success' });
   } catch (error) {
     return next(error);
   }
