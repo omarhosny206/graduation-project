@@ -107,6 +107,12 @@ export async function getProfile(username: string) {
 
 export async function search(searchCriteria: any) {
   try {
+    if (!searchCriteria['info.skills'] && !searchCriteria['fullTextSearch']) {
+      let users = await getAll();
+      users = users.filter((user) => user.role === Role.Interviewer && user.info);
+      return users;
+    }
+
     let filters: any[] = [];
 
     if (searchCriteria['info.skills']) {
