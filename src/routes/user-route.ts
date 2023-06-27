@@ -16,6 +16,7 @@ import userUpdateSkillsSchema from '../validations/user-update-skills-schema';
 import userUpdateSocialsSchema from '../validations/user-update-socials-schema';
 import userUpdateTimeslotsSchema from '../validations/user-update-timeslots-schema';
 import userUpdateUsernameSchema from '../validations/user-update-username-schema';
+import userDeleteAccount from '../validations/user-delete-account';
 
 const router: Router = Router();
 
@@ -97,7 +98,12 @@ router.put(
 );
 
 router.delete('/image', authentication.authenticateByAccessToken, userController.deleteImage);
-router.delete('/:_id', authentication.authenticateByAccessToken, userController.deleteById);
+router.delete(
+  '/',
+  authentication.authenticateByAccessToken,
+  validator.validate(userDeleteAccount),
+  userController.deleteAccount
+);
 
 router.post(
   '/email',

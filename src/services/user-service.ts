@@ -383,9 +383,12 @@ export async function save(user: IUser) {
   }
 }
 
-export async function deleteById(_id: Types.ObjectId) {
+export async function deleteAccount(user: AuthenticatedUser, email: string) {
   try {
-    await UserModel.findOneAndDelete({ _id: _id });
+    const userToBeDeleted = await UserModel.findOneAndDelete({ _id: user._id, email: email });
+    if (!userToBeDeleted) {
+      throw ApiError.unauthorized('Unauthorized. You cannot delete accounts you do not own.');
+    }
   } catch (error) {
     throw ApiError.from(error);
   }
