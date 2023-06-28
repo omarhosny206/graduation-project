@@ -15,7 +15,7 @@ const RABBITMQ_CONNECTION_URL_MQ = process.env.RABBITMQ_CONNECTION_URL_MQ!!;
 
 async function connect() {
   try {
-    const connection: Connection = await client.connect(RABBITMQ_CONNECTION_URL_EC2);
+    const connection: Connection = await client.connect(RABBITMQ_CONNECTION_URL_MQ);
 
     const channel: Channel = await connection.createChannel();
 
