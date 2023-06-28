@@ -6,6 +6,7 @@ import IPasswordReset from '../interfaces/users/password-reset-interface';
 import IPasswordUpdate from '../interfaces/users/password-update-interface';
 import ITimeslot from '../interfaces/users/timeslot-interface';
 import IUserInfo from '../interfaces/users/user-info-interface';
+import IUser from '../interfaces/users/user-interface';
 import * as imageService from '../services/image-service';
 import * as notificationService from '../services/notification-service';
 import * as userService from '../services/user-service';
@@ -274,7 +275,10 @@ export async function requestPricingEligibility(req: Request, res: Response, nex
 
 export async function notify(req: Request, res: Response, next: NextFunction) {
   try {
-    const data = await notificationService.notify();
+    const authenticationUser = req.authenticatedUser;
+    const notification = req.body;
+
+    const data = await notificationService.notify(authenticationUser, notification);
     return res.json(data);
   } catch (error) {
     next(error);
