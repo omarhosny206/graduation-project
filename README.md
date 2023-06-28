@@ -25,6 +25,7 @@
 .
 ├── Dockerfile
 ├── Jenkinsfile
+├── Jenkinsfile-remote-machine
 ├── README.md
 ├── docker-compose-dev.yml
 ├── docker-compose-dev2.yml
@@ -44,6 +45,7 @@
 │   │   └── mongo-config.ts
 │   ├── controllers
 │   │   ├── interview-controller.ts
+│   │   ├── payment-controller.ts
 │   │   ├── signin-controller.ts
 │   │   ├── signup-controller.ts
 │   │   └── user-controller.ts
@@ -88,6 +90,7 @@
 │   ├── routes
 │   │   ├── expired-access-token-handler-route.ts
 │   │   ├── interview-route.ts
+│   │   ├── payment-route.ts
 │   │   ├── signin-route.ts
 │   │   ├── signup-route.ts
 │   │   ├── signup-route2.ts
@@ -102,6 +105,7 @@
 │   │   ├── image-service.ts
 │   │   ├── interview-service.ts
 │   │   ├── notification-service.ts
+│   │   ├── payment-service.ts
 │   │   ├── role-service.ts
 │   │   ├── signin-service.ts
 │   │   ├── signup-service.ts
@@ -120,12 +124,14 @@
 │   │   ├── response-error.ts
 │   │   └── time-slots.ts
 │   └── validations
+│       ├── interview-create-order-schema.ts
 │       ├── interview-info-schema.ts
 │       ├── interview-schema.ts
 │       ├── interview-update-review-schema.ts
 │       ├── signin-schema.ts
 │       ├── signup-by-provider-schema.ts
 │       ├── signup-schema.ts
+│       ├── user-delete-account.ts
 │       ├── user-forgot-password-schema.ts
 │       ├── user-info-schema.ts
 │       ├── user-reset-password-schema.ts
