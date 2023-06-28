@@ -1,4 +1,4 @@
-version: "3.3"
+version: "3.8"
 services:
   app:
     container_name: app-container
@@ -9,35 +9,6 @@ services:
       - ./src:/app/src
     ports:
       - "8080:8080"
-    depends_on:
-      - rabbitmq
-    networks:
-      - app-network
-
-  app2:
-    container_name: app2-container
-    build:
-      context: ../rabbitmq
-    restart: always
-    volumes:
-      - ../rabbitmq/src:/app/src
-    depends_on:
-      - rabbitmq
-    networks:
-      - app-network
-      
-  rabbitmq:
-    container_name: rabbitmq-container
-    image: rabbitmq:3-management-alpine
-    restart: always
-    environment:
-            - RABBITMQ_DEFAULT_USER=root
-            - RABBITMQ_DEFAULT_PASS=password
-    ports:
-        - 5672:5672
-        - 15672:15672
-    volumes:
-        - rabbitmq-volume:/var/lib/rabbitmq
     networks:
       - app-network
 
@@ -53,9 +24,6 @@ services:
       - app
     networks:
       - app-network
-
-volumes:
-  rabbitmq-volume:
 
 networks:
   app-network:
