@@ -6,9 +6,10 @@ import IPasswordReset from '../interfaces/users/password-reset-interface';
 import IPasswordUpdate from '../interfaces/users/password-update-interface';
 import ITimeslot from '../interfaces/users/timeslot-interface';
 import IUserInfo from '../interfaces/users/user-info-interface';
+import IUser from '../interfaces/users/user-interface';
+import * as imageService from '../services/image-service';
 import * as notificationService from '../services/notification-service';
 import * as userService from '../services/user-service';
-import * as imageService from '../services/image-service';
 
 export async function getAll(req: Request, res: Response, next: NextFunction) {
   try {
@@ -126,11 +127,14 @@ export async function getById(req: Request, res: Response, next: NextFunction) {
   }
 }
 
-export async function deleteById(req: Request, res: Response, next: NextFunction) {
+export async function deleteAccount(req: Request, res: Response, next: NextFunction) {
   try {
-    const { _id } = req.params;
-    await userService.deleteById(new Types.ObjectId(_id));
-    return res.status(StatusCode.Ok).json({ message: 'success' });
+    const authenticatedUser = req.authenticatedUser;
+    const { email } = req.body;
+    console.log('delete account');
+    console.log(authenticatedUser);
+    await userService.deleteAccount(authenticatedUser, email);
+    return res.status(StatusCode.Accepted).json({ message: 'success' });
   } catch (error) {
     return next(error);
   }
@@ -259,9 +263,22 @@ export async function updateEmail(req: Request, res: Response, next: NextFunctio
   }
 }
 
+export async function requestPricingEligibility(req: Request, res: Response, next: NextFunction) {
+  try {
+    const authenticatedUser = req.authenticatedUser;
+    const updatedUser = await userService.requestPricingEligibility(authenticatedUser);
+    return res.status(StatusCode.Ok).json(updatedUser);
+  } catch (error) {
+    return next(error);
+  }
+}
+
 export async function notify(req: Request, res: Response, next: NextFunction) {
   try {
-    const data = await notificationService.notify();
+    const authenticationUser = req.authenticatedUser;
+    const notification = req.body;
+
+    const data = await notificationService.notify(authenticationUser, notification);
     return res.json(data);
   } catch (error) {
     next(error);

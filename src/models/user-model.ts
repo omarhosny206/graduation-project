@@ -45,6 +45,8 @@ const userSchema = new Schema<IUser>(
           required: false,
           _id: false,
         },
+        merchantId: { type: String, required: false },
+        devicesTokens: { type: [{ type: String }], required: false, default: [] },
       },
       required: false,
       _id: false,

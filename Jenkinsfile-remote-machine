@@ -1,0 +1,20 @@
+pipeline {
+    agent any
+    stages {
+        stage("Execute Commands on Remote Machine") {
+            steps {
+                script {
+                    writeFile file: 'remote_script.sh', text: '''
+                        sudo su
+                        cd developer/graduation-project/
+                        git pull
+                        docker compose -f docker-compose-dev2.yml up -d --build
+                    '''
+                    sh '''
+                        ssh -o StrictHostKeyChecking=no -i /var/jenkins_home/key-pairs ubuntu@ec2-18-204-201-112.compute-1.amazonaws.com 'bash -s' < remote_script.sh
+                    '''
+                }
+            }
+        }
+    }
+}

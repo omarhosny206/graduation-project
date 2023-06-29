@@ -16,9 +16,9 @@ import userUpdateSkillsSchema from '../validations/user-update-skills-schema';
 import userUpdateSocialsSchema from '../validations/user-update-socials-schema';
 import userUpdateTimeslotsSchema from '../validations/user-update-timeslots-schema';
 import userUpdateUsernameSchema from '../validations/user-update-username-schema';
+import userDeleteAccount from '../validations/user-delete-account';
 
 const router: Router = Router();
-
 
 router.get('/', userController.getAll);
 router.get('/fixed', userController.getAllFixed);
@@ -36,6 +36,12 @@ router.get('/interviews-had/:username', userController.getInterviewsHad);
 router.get('/:username', userController.getProfile);
 router.get('/:_id', authentication.authenticateByAccessToken, userController.getById);
 
+router.post(
+  '/pricing',
+  authentication.authenticateByAccessToken,
+  authorization.authorizeByRole(Role.Interviewer),
+  userController.requestPricingEligibility
+);
 router.post('/image', authentication.authenticateByAccessToken, multerUploadImage, userController.saveImage);
 router.post('/email/confirmation/:emailConfirmationToken', userController.confirmEmail);
 router.post('/forgot-password', validator.validate(userForgotPasswordSchema), userController.forgotPassword);
@@ -92,7 +98,12 @@ router.put(
 );
 
 router.delete('/image', authentication.authenticateByAccessToken, userController.deleteImage);
-router.delete('/:_id', authentication.authenticateByAccessToken, userController.deleteById);
+router.delete(
+  '/',
+  authentication.authenticateByAccessToken,
+  validator.validate(userDeleteAccount),
+  userController.deleteAccount
+);
 
 router.post(
   '/email',

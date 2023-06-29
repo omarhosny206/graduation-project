@@ -1,20 +1,18 @@
 import axios from 'axios';
 
+import IUser from '../interfaces/users/user-interface';
 import ApiError from '../utils/api-error';
 
 const FCM_URL = process.env.FCM_URL!!;
 const FCM_SERVER_KEY = process.env.FCM_SERVER_KEY!!;
 
-export async function notify() {
+export async function notify(user: IUser, notification: any) {
   try {
-    const token =
-      'e7Dw8bX7-urxYfsydrd2PG:APA91bEvG10LV1IL22VigTcUmbpNWF8Bx55ORrNKCExg12xRQlnOj-nVDNr_6Klu1gR6RhSBHR34hdsLK_UgKrbc43AtqT1A8_S0xtZatbFKuBlblWygtSAAtOBbPW7o2d6Z0VP6xp-Y';
-    const tokens: string[] = [token];
+    const tokens = user.info?.devicesTokens!!;
 
-    const notification = {
-      title: 'Pass Interviews Notification',
-      text: 'Someone has booked an interview with you, confirm it now',
-    };
+    if (tokens.length <= 0) {
+      return;
+    }
 
     const body = {
       notification: notification,
@@ -28,7 +26,6 @@ export async function notify() {
 
     const { data } = await axios.post(FCM_URL, body, { headers: headers });
     console.log(data);
-    return data;
   } catch (error) {
     console.log(error);
     throw ApiError.from(error);

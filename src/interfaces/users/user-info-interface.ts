@@ -1,7 +1,8 @@
 import { Types } from 'mongoose';
+
+import { LevelOfExperience } from '../../enums/level-of-experience-enum';
 import ISocials from './socials-interface';
 import ITimeslot from './timeslot-interface';
-import { LevelOfExperience } from '../../enums/level-of-experience-enum';
 
 export default interface IUserInfo {
   firstName: string;
@@ -15,4 +16,6 @@ export default interface IUserInfo {
   skills?: string[];
   socials?: ISocials;
   timeslots: ITimeslot[];
+  merchantId?: string;
+  devicesTokens?: string[];
 }

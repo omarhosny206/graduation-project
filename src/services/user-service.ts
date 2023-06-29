@@ -107,6 +107,12 @@ export async function getProfile(username: string) {
 
 export async function search(searchCriteria: any) {
   try {
+    if (!searchCriteria['info.skills'] && !searchCriteria['fullTextSearch']) {
+      let users = await getAll();
+      users = users.filter((user) => user.role === Role.Interviewer && user.info);
+      return users;
+    }
+
     let filters: any[] = [];
 
     if (searchCriteria['info.skills']) {
@@ -151,7 +157,7 @@ export async function search(searchCriteria: any) {
       },
       {
         $match: {
-          'role': { $eq: Role.Interviewer },
+          role: { $eq: Role.Interviewer },
         },
       },
       {
@@ -213,8 +219,8 @@ export async function updatePrice(user: AuthenticatedUser, price: number) {
       throw ApiError.badRequest('User info is required');
     }
 
-    if (!user.info.priceable && !(await isIllegibleForPricing(user))) {
-      throw ApiError.badRequest('Cannot update price, user is not illegible for pricing');
+    if (!user.info.priceable) {
+      throw ApiError.badRequest('Cannot update price, you are not priceable, request pricing eligibility');
     }
 
     user.info.price = price;
@@ -383,9 +389,12 @@ export async function save(user: IUser) {
   }
 }
 
-export async function deleteById(_id: Types.ObjectId) {
+export async function deleteAccount(user: AuthenticatedUser, email: string) {
   try {
-    await UserModel.findOneAndDelete({ _id: _id });
+    const userToBeDeleted = await UserModel.findOneAndDelete({ _id: user._id, email: email });
+    if (!userToBeDeleted) {
+      throw ApiError.unauthorized('Unauthorized. You cannot delete accounts you do not own.');
+    }
   } catch (error) {
     throw ApiError.from(error);
   }
@@ -425,7 +434,31 @@ export async function getInterviewsMadeGroupedByStatus(user: AuthenticatedUser) 
   }
 }
 
-export async function isIllegibleForPricing(user: AuthenticatedUser) {
+export async function requestPricingEligibility(user: AuthenticatedUser) {
+  try {
+    if (!user.info) {
+      throw ApiError.badRequest('user info is required.');
+    }
+
+    if (user.info.priceable) {
+      return user;
+    }
+
+    const isEligible = await isEligibleForPricing(user);
+
+    if (!isEligible) {
+      throw ApiError.badRequest(`Not eligible, you must at least pass 60% of all interviews' ratings`);
+    }
+
+    user.info.priceable = true;
+    const updatedUser = await user.save();
+    return updatedUser;
+  } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
+export async function isEligibleForPricing(user: AuthenticatedUser) {
   try {
     if (user.info?.priceable) {
       return true;
@@ -434,7 +467,7 @@ export async function isIllegibleForPricing(user: AuthenticatedUser) {
     const interviewsMadeWithReviews = await interviewService.getInterviewsMadeWithReviews(user);
 
     if (interviewsMadeWithReviews.length < 3) {
-      throw ApiError.badRequest('Not illegible, you must have at least 3 finished interviews with ratings');
+      throw ApiError.badRequest('Not eligible, you must have at least 3 finished interviews with ratings');
     }
 
     const rating: number = await getRatingForInterviewer(user, interviewsMadeWithReviews);
@@ -565,6 +598,20 @@ export async function existsByUsername(username: string) {
     }
 
     return true;
+  } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
+export async function saveMerchantId(user: AuthenticatedUser, merchantId: string) {
+  try {
+    if (!user.info) {
+      throw ApiError.badRequest('user info is required.');
+    }
+
+    user.info.merchantId = merchantId;
+    const updatedUser = await user.save();
+    return updatedUser;
   } catch (error) {
     throw ApiError.from(error);
   }
