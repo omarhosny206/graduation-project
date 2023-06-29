@@ -105,6 +105,25 @@ export async function getProfile(username: string) {
   }
 }
 
+export async function getMyProfile(user: AuthenticatedUser) {
+  try {
+    let interviewsWithReviews = null;
+    let rating = null;
+
+    if (user.role === Role.Interviewer) {
+      interviewsWithReviews = await interviewService.getInterviewsMadeWithReviews(user);
+      rating = await getRatingForInterviewer(user, interviewsWithReviews);
+    } else {
+      interviewsWithReviews = await interviewService.getInterviewsHadWithReviews(user);
+      rating = await getRatingForInterviewee(user, interviewsWithReviews);
+    }
+
+    return { ...user.toObject(), rating: rating };
+  } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
 export async function search(searchCriteria: any) {
   try {
     if (!searchCriteria['info.skills'] && !searchCriteria['fullTextSearch']) {
