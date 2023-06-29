@@ -110,6 +110,16 @@ export async function search(searchCriteria: any) {
     if (!searchCriteria['info.skills'] && !searchCriteria['fullTextSearch']) {
       let users = await getAll();
       users = users.filter((user) => user.role === Role.Interviewer && user.info);
+
+      users = await Promise.all(
+        users.map(async (user) => {
+          const interviewsMadeWithReviews: any[] = await interviewService.getInterviewsMadeWithReviews(user);
+          const rating = await getRatingForInterviewer(user, interviewsMadeWithReviews);
+          const currentUser = { ...user.toObject(), rating: rating };
+          return currentUser;
+        }) as any
+      );
+
       return users;
     }
 
