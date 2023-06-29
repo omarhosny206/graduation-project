@@ -1,3 +1,4 @@
+import { config } from 'dotenv';
 import mongoose from 'mongoose';
 import request from 'supertest';
 
@@ -5,7 +6,6 @@ import { Role } from '../../../enums/role-enum';
 import ISignupRequest from '../../../interfaces/users/signup-request-interface';
 import { createMongoMemoryServer } from '../../../utils/mongo-memory-server';
 import { app } from '../../../utils/server';
-import { config } from 'dotenv';
 
 config();
 
@@ -24,7 +24,7 @@ describe('signup-controller', () => {
     it('should send 201 CREATED', async () => {
       const signupRequest: ISignupRequest = {
         email: 'omarhosny102@gmail.com',
-        password: '12345678',
+        password: 'test@testA1',
         role: Role.Interviewer,
       };
 
@@ -36,7 +36,7 @@ describe('signup-controller', () => {
     it('should send 400 BAD REQUEST', async () => {
       const signupRequest: ISignupRequest = {
         email: 'omarhosny102@gmail.com',
-        password: '12345678',
+        password: 'test@testA1',
         role: Role.Interviewer,
       };
 
@@ -48,7 +48,7 @@ describe('signup-controller', () => {
     it('should send 400 BAD REQUEST', async () => {
       const signupRequest: ISignupRequest = {
         email: 'omarhosny102',
-        password: '12345678',
+        password: 'test@testA1',
         role: Role.Interviewer,
       };
 
@@ -60,7 +60,7 @@ describe('signup-controller', () => {
     it('should send 400 BAD REQUEST', async () => {
       const signupRequest: ISignupRequest = {
         email: 'omarhosny102@gmail.com',
-        password: '1234567',
+        password: 'tt@A1',
         role: Role.Interviewer,
       };
 

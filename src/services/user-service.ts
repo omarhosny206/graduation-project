@@ -13,6 +13,7 @@ import IUser from '../interfaces/users/user-interface';
 import UserModel from '../models/user-model';
 import * as emailService from '../services/email-service';
 import * as interviewService from '../services/interview-service';
+import * as userService from '../services/user-service';
 import ApiError from '../utils/api-error';
 import { AuthenticatedUser } from '../utils/authenticated-user-type';
 import * as jwt from '../utils/jwt';
@@ -238,7 +239,7 @@ export async function updateUsername(user: AuthenticatedUser, username: string) 
       return user;
     }
 
-    const alreadyExistsByUsername = await existsByUsername(username);
+    const alreadyExistsByUsername = await userService.existsByUsername(username);
     if (alreadyExistsByUsername) {
       throw ApiError.badRequest('username is already used');
     }
@@ -444,7 +445,7 @@ export async function requestPricingEligibility(user: AuthenticatedUser) {
       return user;
     }
 
-    const isEligible = await isEligibleForPricing(user);
+    const isEligible = await userService.isEligibleForPricing(user);
 
     if (!isEligible) {
       throw ApiError.badRequest(`Not eligible, you must at least pass 60% of all interviews' ratings`);

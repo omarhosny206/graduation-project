@@ -11,7 +11,7 @@ export const users: IUser[] = [
   {
     _id: interviewerId,
     email: 'omarhosny102@gmail.com',
-    password: bcrypt.hashSync('12345678', 10),
+    password: bcrypt.hashSync('test@testA1', 10),
     role: Role.Interviewer,
     username: 'omarhosny102',
     active: true,
@@ -35,7 +35,7 @@ export const users: IUser[] = [
   {
     _id: interviewerId2,
     email: 'omarhosnykishk@gmail.com',
-    password: bcrypt.hashSync('12345678', 10),
+    password: bcrypt.hashSync('test@testA1', 10),
     role: Role.Interviewer,
     username: 'omarhosnykishk',
     active: true,
@@ -46,7 +46,7 @@ export const users: IUser[] = [
   {
     _id: intervieweeId,
     email: 'softwarenotes1@gmail.com',
-    password: bcrypt.hashSync('12345678', 10),
+    password: bcrypt.hashSync('test@testA1', 10),
     role: Role.Interviewee,
     username: 'softwarenotes1',
     active: true,
@@ -70,7 +70,7 @@ export const users: IUser[] = [
   {
     _id: intervieweeId2,
     email: 'alex@gmail.com',
-    password: bcrypt.hashSync('12345678', 10),
+    password: bcrypt.hashSync('test@testA1', 10),
     role: Role.Interviewee,
     username: 'alex',
     active: true,
@@ -81,7 +81,7 @@ export const users: IUser[] = [
   {
     _id: new mongoose.Types.ObjectId(),
     email: 'omaraws@gmail.com',
-    password: bcrypt.hashSync('12345678', 10),
+    password: bcrypt.hashSync('test@testA1', 10),
     role: Role.Interviewer,
     username: 'omaraws',
     active: true,

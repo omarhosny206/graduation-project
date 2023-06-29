@@ -22,7 +22,7 @@ describe('signin-controller', () => {
     it('should send 200 OK', async () => {
       const signInRequest: ISigninRequest = {
         email: 'omaraws@gmail.com',
-        password: '12345678',
+        password: 'test@testA1',
       };
 
       await request(app).post('/api/v1/signin').send(signInRequest).expect(200);
@@ -33,7 +33,7 @@ describe('signin-controller', () => {
     it('should send 401 UNAUTHORIZED', async () => {
       const signInRequest: ISigninRequest = {
         email: 'omarhosny103@gmail.com',
-        password: '123456789',
+        password: 'test@testA2',
       };
       await request(app).post('/api/v1/signin').send(signInRequest).expect(401);
     });
@@ -53,7 +53,7 @@ describe('signin-controller', () => {
     it('should send 400 BAD REQUEST', async () => {
       const signInRequest: ISigninRequest = {
         email: 'omarhosny102@gmail.com',
-        password: '1234567',
+        password: 'tt@A1',
       };
       await request(app).post('/api/v1/signin').send(signInRequest).expect(400);
     });

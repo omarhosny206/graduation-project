@@ -1,17 +1,12 @@
+import { config } from 'dotenv';
 import mongoose from 'mongoose';
 import request from 'supertest';
 
 import { LevelOfExperience } from '../../../enums/level-of-experience-enum';
-import {
-  generateAccessToken,
-  generateEmailConfirmationToken,
-  generateEmailUpdatingToken,
-  generateResetPasswordToken,
-} from '../../../utils/jwt';
+import { generateAccessToken, generateEmailConfirmationToken, generateEmailUpdatingToken, generateResetPasswordToken } from '../../../utils/jwt';
 import { createMongoMemoryServer } from '../../../utils/mongo-memory-server';
 import { app } from '../../../utils/server';
 import { saveUsers, users } from '../../dummy/users';
-import { config } from 'dotenv';
 
 config({ path: '../../../../.env' });
 
@@ -749,9 +744,9 @@ describe('user-controller', () => {
           await request(app)
             .put(`/api/v1/users/password`)
             .send({
-              oldPassword: '12345678',
-              newPassword: '123456789',
-              confirmPassword: '123456789',
+              oldPassword: 'test@testA1',
+              newPassword: 'test@testA1',
+              confirmPassword: 'test@testA1',
             })
             .set('Authorization', `Bearer ${intervieweeAccessToken2}`)
             .expect(200);
@@ -825,8 +820,8 @@ describe('user-controller', () => {
         await request(app)
           .put(`/api/v1/users/reset-password/${resetPasswordAccessToken}`)
           .send({
-            newPassword: '12345678',
-            confirmPassword: '12345678',
+            newPassword: 'test@testA1',
+            confirmPassword: 'test@testA1',
           })
           .set('Authorization', `Bearer ${intervieweeAccessToken2}`)
           .expect(200);
@@ -841,8 +836,8 @@ describe('user-controller', () => {
         await request(app)
           .put(`/api/v1/users/reset-password/${resetPasswordAccessToken}`)
           .send({
-            newPassword: '12345678',
-            confirmPassword: '123456789',
+            newPassword: 'test@testA1',
+            confirmPassword: 'test@testA2',
           })
           .set('Authorization', `Bearer ${intervieweeAccessToken2}`)
           .expect(400);

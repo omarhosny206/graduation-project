@@ -4,9 +4,9 @@ import {
   getByEmail,
   update,
   updatePrice,
+  updateRole,
   updateSkills,
   updateUsername,
-  updateRole,
 } from '../../../services/user-service';
 import * as userService from '../../../services/user-service';
 import ApiError from '../../../utils/api-error';
@@ -150,8 +150,8 @@ describe('user-service', () => {
       });
     });
 
-    describe('with prior info and not priceable but eligible for pricing', () => {
-      it('should send the updated user', async () => {
+    describe('with prior info and not priceable', () => {
+      it(`should throw ApiError.badRequest('Cannot update price, you are not priceable, request pricing eligibility')`, async () => {
         const userInfo: any = { price: 20 };
         const storedUser = {
           ...users[0],
@@ -163,30 +163,10 @@ describe('user-service', () => {
         };
 
         // mock
-        jest.spyOn(userService, 'isIllegibleForPricing').mockResolvedValue(true);
-
-        const user = await updatePrice(storedUser, userInfo);
-        expect(user.info).toEqual({ ...users[0].info, ...userInfo });
-      });
-    });
-
-    describe('with prior info and not priceable but not eligible for pricing', () => {
-      it(`should throw ApiError.badRequest('Cannot update price, user is not illegible for pricing')`, async () => {
-        const userInfo: any = { price: 20 };
-        const storedUser = {
-          ...users[0],
-          info: { ...users[0].info, priceable: false },
-          save: jest.fn().mockResolvedValueOnce({
-            ...users[0],
-            info: { ...users[0].info, ...userInfo },
-          }),
-        };
-
-        // mock
-        jest.spyOn(userService, 'isIllegibleForPricing').mockResolvedValue(false);
+        jest.spyOn(userService, 'isEligibleForPricing').mockResolvedValue(true);
 
         await expect(updatePrice(storedUser, userInfo)).rejects.toThrow(
-          ApiError.badRequest('Cannot update price, user is not illegible for pricing')
+          ApiError.badRequest('Cannot update price, you are not priceable, request pricing eligibility')
         );
       });
     });
