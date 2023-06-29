@@ -39,6 +39,16 @@ export async function getProfile(req: Request, res: Response, next: NextFunction
   }
 }
 
+export async function getMyProfile(req: Request, res: Response, next: NextFunction) {
+  try {
+    const authenticatedUser = req.authenticatedUser;
+    const user = await userService.getMyProfile(authenticatedUser);
+    return res.status(StatusCode.Ok).json(user);
+  } catch (error) {
+    return next(error);
+  }
+}
+
 export async function search(req: Request, res: Response, next: NextFunction) {
   try {
     const filterCriteria = req.query;
