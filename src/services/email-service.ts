@@ -107,6 +107,19 @@ export async function sendRejectedInterviewEmails(
   }
 }
 
+export async function sendFinishedInterviewEmails(interviewer: IUser, interviewee: IUser, interview: IInterview) {
+  try {
+    const [interviewerMailOptions, intervieweeMailOptions] = await getFinishedInterviewMailOptions(
+      interviewer,
+      interviewee,
+      interview
+    );
+    await Promise.all([transporter.sendMail(interviewerMailOptions), transporter.sendMail(intervieweeMailOptions)]);
+  } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
 export async function getEmailConfirmationMailOptions(email: string) {
   try {
     const emailConfirmationToken = await jwt.generateEmailConfirmationToken(email);
@@ -122,8 +135,6 @@ export async function getEmailConfirmationMailOptions(email: string) {
 export async function getVideoMeetingMailOptions(interviewer: IUser, interviewee: IUser, interview: IInterview) {
   try {
     const date = new Date(interview.date.getTime() + INTERVIEW_MEETING_URL_TIME_DIFFERENCE);
-    console.log(interview);
-
     const subject = '[Pass] Interview Video Meeting';
     const body = `<a href="http://localhost:8080/api/v1/interviews/${
       interview._id
@@ -145,8 +156,6 @@ export async function getVideoMeetingMailOptions(interviewer: IUser, interviewee
 
 export async function getPendedInterviewMailOptions(interviewer: IUser, interviewee: IUser, interview: IInterview) {
   try {
-    console.log(interview);
-
     const subject = `[Pass] Interview has been booked with status [PENDING]`;
     const interviewerBody = `<a href="http://localhost:8080/api/v1/interviews/${interview._id}"> Interview </a> <p>Interviewer: <a href="http://localhost:8080/api/v1/users/${interviewer.username}"> ${interviewer.username} </a></p> <p>Interviewee: <a href="http://localhost:8080/api/v1/users/${interviewee.username}"> ${interviewee.username}</a></p> <p>Note: you can either confirm or reject this interview</p>`;
     const intervieweeBody = `<a href="http://localhost:8080/api/v1/interviews/${interview._id}"> Interview </a> <p>Interviewer: <a href="http://localhost:8080/api/v1/users/${interviewer.username}"> ${interviewer.username} </a></p> <p>Interviewee: <a href="http://localhost:8080/api/v1/users/${interviewee.username}"> ${interviewee.username}</a></p> <p>Note: you can reject this interview before the interviewer's confirmation</p>`;
@@ -161,8 +170,6 @@ export async function getPendedInterviewMailOptions(interviewer: IUser, intervie
 
 export async function getConfirmedInterviewMailOptions(interviewer: IUser, interviewee: IUser, interview: IInterview) {
   try {
-    console.log(interview);
-
     const subject = `[Pass] Interview status [CONFIRMED]`;
     let interviewerBody = `<a href="http://localhost:8080/api/v1/interviews/${interview._id}"> Interview </a> <p>Interviewer: <a href="http://localhost:8080/api/v1/users/${interviewer.username}"> ${interviewer.username} </a></p> <p>Interviewee: <a href="http://localhost:8080/api/v1/users/${interviewee.username}"> ${interviewee.username}`;
     let intervieweeBody = `<a href="http://localhost:8080/api/v1/interviews/${interview._id}"> Interview </a> <p>Interviewer: <a href="http://localhost:8080/api/v1/users/${interviewer.username}"> ${interviewer.username} </a></p> <p>Interviewee: <a href="http://localhost:8080/api/v1/users/${interviewee.username}"> ${interviewee.username}`;
@@ -185,8 +192,6 @@ export async function getRejectedInterviewMailOptions(
   rejectedByInterviewer: boolean
 ) {
   try {
-    console.log(interview);
-
     let subject = `[Pass] Interview status [REJECTED`;
     let body = `<a href="http://localhost:8080/api/v1/interviews/${interview._id}"> Interview </a> <p>Interviewer: <a href="http://localhost:8080/api/v1/users/${interviewer.username}"> ${interviewer.username} </a></p> <p>Interviewee: <a href="http://localhost:8080/api/v1/users/${interviewee.username}"> ${interviewee.username}`;
 
@@ -204,12 +209,24 @@ export async function getRejectedInterviewMailOptions(
   }
 }
 
+export async function getFinishedInterviewMailOptions(interviewer: IUser, interviewee: IUser, interview: IInterview) {
+  try {
+    const subject = `[Pass] Interview status [FINISHED]`;
+    let body = `<a href="http://localhost:8080/api/v1/interviews/${interview._id}"> Interview </a> <p>Interviewer: <a href="http://localhost:8080/api/v1/users/${interviewer.username}"> ${interviewer.username} </a></p> <p>Interviewee: <a href="http://localhost:8080/api/v1/users/${interviewee.username}"> ${interviewee.username} <p>Add info and review NOW!!!</p>`;
+
+    const interviewerMailOptions = { from: GMAIL_USER, to: interviewer.email, html: body, subject: subject };
+    const intervieweeMailOptions = { from: GMAIL_USER, to: interviewee.email, html: body, subject: subject };
+    return [interviewerMailOptions, intervieweeMailOptions];
+  } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
 export async function getEmailUpdateMailOptions(email: string) {
   try {
     const emailUpdateToken = await jwt.generateEmailUpdatingToken(email);
     const subject = '[Pass] Request for email update';
     const body = `<b>Click this <a href=${EMAIL_UPDATE_ENDPOINT}/${emailUpdateToken}> link </a></b>`;
-    console.log(EMAIL_UPDATE_ENDPOINT);
 
     const mailOptions: Mail.Options = {
       from: GMAIL_USER,
