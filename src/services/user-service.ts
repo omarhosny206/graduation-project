@@ -440,7 +440,8 @@ export async function editTimeslots(user: AuthenticatedUser, timeslots: ITimeslo
     }
 
     user.info.timeslots = timeslots;
-    await user.save();
+    const updatedUser = await user.save();
+    return updatedUser;
   } catch (error) {
     throw ApiError.from(error);
   }
