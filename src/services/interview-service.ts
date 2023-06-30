@@ -312,11 +312,7 @@ export async function markAsFinished(currentDate: Date) {
       interviewsToMarkAsFinished.map(async (interview) => {
         console.log(`Interview (${interview._id}) marked as finished`);
         interview.status = InterviewStatus.Finished;
-        const [interviewer, interviewee] = await Promise.all([
-          await userService.getById(interview.interviewer),
-          await userService.getById(interview.interviewee),
-        ]);
-        emailService.sendFinishedInterviewEmails(interviewer, interviewee, interview);
+        handleSendingMarkedAsFinishedInterviewEmails(interview);
       })
     );
 
@@ -344,11 +340,7 @@ export async function markAsRejected(currentDate: Date) {
       interviewsToMarkAsRejected.map(async (interview) => {
         console.log(`Interview (${interview._id}) marked as rejected`);
         interview.status = InterviewStatus.Rejected;
-        const [interviewer, interviewee] = await Promise.all([
-          await userService.getById(interview.interviewer),
-          await userService.getById(interview.interviewee),
-        ]);
-        emailService.sendRejectedInterviewEmails(interviewer, interviewee, interview, true);
+        handleSendingMarkedAsRejectedInterviewEmails(interview);
       })
     );
 
@@ -480,6 +472,30 @@ export async function handleSendingPendedInterviewEmails(
 ) {
   try {
     emailService.sendPendedInterviewEmails(interviewer, interviewee, interview);
+  } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
+export async function handleSendingMarkedAsRejectedInterviewEmails(interview: IInterview) {
+  try {
+    const [interviewer, interviewee] = await Promise.all([
+      await userService.getById(interview.interviewer),
+      await userService.getById(interview.interviewee),
+    ]);
+    emailService.sendRejectedInterviewEmails(interviewer, interviewee, interview, true);
+  } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
+export async function handleSendingMarkedAsFinishedInterviewEmails(interview: IInterview) {
+  try {
+    const [interviewer, interviewee] = await Promise.all([
+      await userService.getById(interview.interviewer),
+      await userService.getById(interview.interviewee),
+    ]);
+    emailService.sendFinishedInterviewEmails(interviewer, interviewee, interview);
   } catch (error) {
     throw ApiError.from(error);
   }
