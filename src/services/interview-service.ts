@@ -308,10 +308,17 @@ export async function markAsFinished(currentDate: Date) {
         interview.date.getTime() + MARK_AS_FINISHED_TIME_DIFFERENCE <= currentDate.getTime()
     );
 
-    interviewsToMarkAsFinished.forEach((interview) => {
-      console.log(`Interview (${interview._id}) marked as finished`);
-      interview.status = InterviewStatus.Finished;
-    });
+    await Promise.all(
+      interviewsToMarkAsFinished.map(async (interview) => {
+        console.log(`Interview (${interview._id}) marked as finished`);
+        interview.status = InterviewStatus.Finished;
+        const [interviewer, interviewee] = await Promise.all([
+          await userService.getById(interview.interviewer),
+          await userService.getById(interview.interviewee),
+        ]);
+        emailService.sendFinishedInterviewEmails(interviewer, interviewee, interview);
+      })
+    );
 
     await InterviewModel.bulkSave(interviewsToMarkAsFinished);
   } catch (error) {
@@ -333,10 +340,17 @@ export async function markAsRejected(currentDate: Date) {
       );
     });
 
-    interviewsToMarkAsRejected.forEach((interview) => {
-      console.log(`Interview (${interview._id}) marked as rejected`);
-      interview.status = InterviewStatus.Rejected;
-    });
+    await Promise.all(
+      interviewsToMarkAsRejected.map(async (interview) => {
+        console.log(`Interview (${interview._id}) marked as rejected`);
+        interview.status = InterviewStatus.Rejected;
+        const [interviewer, interviewee] = await Promise.all([
+          await userService.getById(interview.interviewer),
+          await userService.getById(interview.interviewee),
+        ]);
+        emailService.sendRejectedInterviewEmails(interviewer, interviewee, interview, true);
+      })
+    );
 
     await InterviewModel.bulkSave(interviewsToMarkAsRejected);
   } catch (error) {
