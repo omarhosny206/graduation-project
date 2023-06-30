@@ -5,9 +5,9 @@ import IUserInfo from '../interfaces/users/user-info-interface';
 
 const userUpdateSocialsSchema: Joi.ObjectSchema<IUserInfo> = Joi.object<IUserInfo>({
   socials: Joi.object<ISocials>({
-    github: Joi.string().required(),
-    linkedin: Joi.string().required(),
-    twitter: Joi.string().required(),
+    github: Joi.string().allow("").required(),
+    linkedin: Joi.string().allow("").required(),
+    twitter: Joi.string().allow("").required(),
   }).required(),
 });
 
