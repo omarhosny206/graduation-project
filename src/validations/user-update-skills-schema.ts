@@ -10,6 +10,7 @@ const userUpdateSkillsSchema: Joi.ObjectSchema<IUserInfo> = Joi.object<IUserInfo
         .valid(...ALL_SKILLS)
         .required()
     )
+    .unique()
     .required(),
 });
 
