@@ -154,8 +154,8 @@ export async function editTimeslots(req: Request, res: Response, next: NextFunct
   try {
     const timeslots = req.body.timeslots as ITimeslot[];
     const authenticatedUser = req.authenticatedUser;
-    await userService.editTimeslots(authenticatedUser, timeslots);
-    return res.status(StatusCode.Ok).json({ message: 'success' });
+    const updatedUser = await userService.editTimeslots(authenticatedUser, timeslots);
+    return res.status(StatusCode.Ok).json(updatedUser);
   } catch (error) {
     return next(error);
   }
