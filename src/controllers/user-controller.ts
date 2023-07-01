@@ -316,3 +316,14 @@ export async function deleteImage(req: Request, res: Response, next: NextFunctio
     next(error);
   }
 }
+
+export async function getAllFinishedInterviewsByType(req: Request, res: Response, next: NextFunction) {
+  try {
+    const username = req.params.username;
+    const type = req.query.type as string;
+    let interviews = await userService.getAllFinishedInterviewsByType(username, type);
+    return res.status(StatusCode.Ok).json(interviews);
+  } catch (error) {
+    next(error);
+  }
+}

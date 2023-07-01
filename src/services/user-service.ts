@@ -646,3 +646,13 @@ export async function saveMerchantId(user: AuthenticatedUser, merchantId: string
     throw ApiError.from(error);
   }
 }
+
+export async function getAllFinishedInterviewsByType(username: string, type: string) {
+  try {
+    const user = await getByUserName(username);
+    let interviews = await interviewService.getAllFinishedInterviewsByType(user, type);
+    return interviews;
+  } catch (error) {
+    throw ApiError.from(error);
+  }
+}

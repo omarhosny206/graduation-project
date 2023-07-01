@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import mongoose from 'mongoose';
 
+import { InterviewStatus } from '../enums/interview-status-enum';
 import { StatusCode } from '../enums/status-code-enum';
 import IInterviewInfo from '../interfaces/interviews/interview-info-interface';
 import IInterview from '../interfaces/interviews/interview-interface';
@@ -114,6 +115,18 @@ export async function reject(req: Request, res: Response, next: NextFunction) {
     const authenticatedUser = req.authenticatedUser;
     const updatedInterview = await interviewService.reject(_id, authenticatedUser);
     return res.status(StatusCode.Ok).json(updatedInterview);
+  } catch (error) {
+    return next(error);
+  }
+}
+
+export async function getAllByStatusAndType(req: Request, res: Response, next: NextFunction) {
+  try {
+    const status = req.query.status as InterviewStatus;
+    const type = req.query.type as string;
+    const authenticatedUser = req.authenticatedUser;
+    const interviews = await interviewService.getAllByStatusAndType(authenticatedUser, status, type);
+    return res.status(StatusCode.Ok).json(interviews);
   } catch (error) {
     return next(error);
   }

@@ -500,3 +500,43 @@ export async function handleSendingMarkedAsFinishedInterviewEmails(interview: II
     throw ApiError.from(error);
   }
 }
+
+export async function getAllByStatusAndType(user: AuthenticatedUser, status: InterviewStatus, type: string) {
+  try {
+    let interviews = null;
+
+    if (type === 'made' && user.role === Role.Interviewee) {
+      throw ApiError.badRequest('Cannot get interviews made, interviewee role is not allowed to make interviews');
+    }
+
+    if (type === 'had') {
+      interviews = await InterviewModel.find({ interviewee: user._id, status: status });
+    } else {
+      interviews = await InterviewModel.find({ interviewer: user._id, status: status });
+    }
+
+    return interviews;
+  } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
+export async function getAllFinishedInterviewsByType(user: IUser, type: string) {
+  try {
+    let interviews = null;
+
+    if (type === 'made' && user.role === Role.Interviewee) {
+      throw ApiError.badRequest('Cannot get interviews made, interviewee role is not allowed to make interviews');
+    }
+
+    if (type === 'had') {
+      interviews = await InterviewModel.find({ interviewee: user._id, status: InterviewStatus.Finished });
+    } else {
+      interviews = await InterviewModel.find({ interviewer: user._id, status: InterviewStatus.Finished });
+    }
+
+    return interviews;
+  } catch (error) {
+    throw ApiError.from(error);
+  }
+}
