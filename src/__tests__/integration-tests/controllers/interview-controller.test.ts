@@ -31,8 +31,54 @@ describe('interview-controller', () => {
   // GET
   describe('GET', () => {
     describe('get all interviews', () => {
-      it('should send 200 OK', async () => {
-        await request(app).get('/api/v1/interviews').expect(200);
+      describe('valid query strings', () => {
+        it('should send 200 OK', async () => {
+          const intervieweeAccessToken = await generateAccessToken(users[2].email);
+          await request(app)
+            .get('/api/v1/interviews?type=had&&status=finished')
+            .set('Authorization', `Bearer ${intervieweeAccessToken}`)
+            .expect(200);
+        });
+      });
+
+      describe('invalid query strings missing type', () => {
+        it('should send 200 OK', async () => {
+          const intervieweeAccessToken = await generateAccessToken(users[2].email);
+          await request(app)
+            .get('/api/v1/interviews?status=finished')
+            .set('Authorization', `Bearer ${intervieweeAccessToken}`)
+            .expect(400);
+        });
+      });
+
+      describe('invalid query strings wrong type', () => {
+        it('should send 200 OK', async () => {
+          const intervieweeAccessToken = await generateAccessToken(users[2].email);
+          await request(app)
+            .get('/api/v1/interviews?type=xxx&&status=finished')
+            .set('Authorization', `Bearer ${intervieweeAccessToken}`)
+            .expect(400);
+        });
+      });
+
+      describe('invalid query strings missing status', () => {
+        it('should send 200 OK', async () => {
+          const intervieweeAccessToken = await generateAccessToken(users[2].email);
+          await request(app)
+            .get('/api/v1/interviews?type=had')
+            .set('Authorization', `Bearer ${intervieweeAccessToken}`)
+            .expect(400);
+        });
+      });
+
+      describe('invalid query strings wrong status', () => {
+        it('should send 200 OK', async () => {
+          const intervieweeAccessToken = await generateAccessToken(users[2].email);
+          await request(app)
+            .get('/api/v1/interviews?type=had&&status=xxx')
+            .set('Authorization', `Bearer ${intervieweeAccessToken}`)
+            .expect(400);
+        });
       });
     });
   });

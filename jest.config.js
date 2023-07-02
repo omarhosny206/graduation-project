@@ -7,7 +7,7 @@ module.exports = {
   testEnvironment: 'node',
   setupFilesAfterEnv: ['./jest-setup.js'],
   testMatch: ['**/**/**/**/*.test.ts'],
-  collectCoverage: true,
+  // collectCoverage: true,
   // collectCoverageFrom: ['<rootDir>/src/**/*.ts', '!<rootDir>/src/__tests__/**/*.ts'],
   // coverageReporters: ['text', 'lcov'],
   // coverageDirectory: '<rootDir>/coverage',
