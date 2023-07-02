@@ -10,6 +10,7 @@ import IUser from '../interfaces/users/user-interface';
 import * as imageService from '../services/image-service';
 import * as notificationService from '../services/notification-service';
 import * as userService from '../services/user-service';
+import { InterviewType } from '../enums/interview-type-enum';
 
 export async function getAll(req: Request, res: Response, next: NextFunction) {
   try {
@@ -33,6 +34,16 @@ export async function getProfile(req: Request, res: Response, next: NextFunction
   try {
     const { username } = req.params;
     const user = await userService.getProfile(username);
+    return res.status(StatusCode.Ok).json(user);
+  } catch (error) {
+    return next(error);
+  }
+}
+
+export async function getMyProfile(req: Request, res: Response, next: NextFunction) {
+  try {
+    const authenticatedUser = req.authenticatedUser;
+    const user = await userService.getMyProfile(authenticatedUser);
     return res.status(StatusCode.Ok).json(user);
   } catch (error) {
     return next(error);
@@ -144,8 +155,8 @@ export async function editTimeslots(req: Request, res: Response, next: NextFunct
   try {
     const timeslots = req.body.timeslots as ITimeslot[];
     const authenticatedUser = req.authenticatedUser;
-    await userService.editTimeslots(authenticatedUser, timeslots);
-    return res.status(StatusCode.Ok).json({ message: 'success' });
+    const updatedUser = await userService.editTimeslots(authenticatedUser, timeslots);
+    return res.status(StatusCode.Ok).json(updatedUser);
   } catch (error) {
     return next(error);
   }
@@ -302,6 +313,17 @@ export async function deleteImage(req: Request, res: Response, next: NextFunctio
     const authenticatedUser = req.authenticatedUser;
     const updatedUser = await imageService.remove(authenticatedUser);
     return res.json(updatedUser);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getAllFinishedInterviewsByType(req: Request, res: Response, next: NextFunction) {
+  try {
+    const username = req.params.username;
+    const type = req.query.type as InterviewType;
+    let interviews = await userService.getAllFinishedInterviewsByType(username, type);
+    return res.status(StatusCode.Ok).json(interviews);
   } catch (error) {
     next(error);
   }

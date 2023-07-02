@@ -6,6 +6,8 @@ import * as authentication from '../middlewares/authentication';
 import * as authorization from '../middlewares/authorization';
 import { multerUploadImage } from '../middlewares/multer';
 import * as validator from '../middlewares/validator';
+import * as queryStringValidator from '../middlewares/query-string-validator';
+import userDeleteAccount from '../validations/user-delete-account';
 import userForgotPasswordSchema from '../validations/user-forgot-password-schema';
 import userInfoSchema from '../validations/user-info-schema';
 import userResetPasswordSchema from '../validations/user-reset-password-schema';
@@ -16,11 +18,12 @@ import userUpdateSkillsSchema from '../validations/user-update-skills-schema';
 import userUpdateSocialsSchema from '../validations/user-update-socials-schema';
 import userUpdateTimeslotsSchema from '../validations/user-update-timeslots-schema';
 import userUpdateUsernameSchema from '../validations/user-update-username-schema';
-import userDeleteAccount from '../validations/user-delete-account';
+import interviewTypeQueryStringSchema from '../validations/interview-type-query-string-schema';
 
 const router: Router = Router();
 
 router.get('/', userController.getAll);
+router.get('/profile', authentication.authenticateByAccessToken, userController.getMyProfile);
 router.get('/fixed', userController.getAllFixed);
 router.get('/notify', userController.notify);
 router.get('/search', userController.search);
@@ -33,6 +36,11 @@ router.get(
 router.get('/interviews-made/:username', userController.getInterviewsMade);
 router.get('/interviews-had', authentication.authenticateByAccessToken, userController.getInterviewsHadGroupedByStatus);
 router.get('/interviews-had/:username', userController.getInterviewsHad);
+router.get(
+  '/:username/interviews/finished',
+  queryStringValidator.validate(interviewTypeQueryStringSchema, 'type'),
+  userController.getAllFinishedInterviewsByType
+);
 router.get('/:username', userController.getProfile);
 router.get('/:_id', authentication.authenticateByAccessToken, userController.getById);
 

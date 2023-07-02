@@ -14,6 +14,7 @@ import * as videoMeetingService from '../services/video-meeting-service';
 import ApiError from '../utils/api-error';
 import { AuthenticatedUser } from '../utils/authenticated-user-type';
 import { Interview } from '../utils/interview-type';
+import { InterviewType } from '../enums/interview-type-enum';
 
 const MARK_AS_REJECTED_TIME_DIFFERENCE = Number.parseInt(process.env.MARK_AS_REJECTED_TIME_DIFFERENCE!!);
 const MARK_AS_FINISHED_TIME_DIFFERENCE = Number.parseInt(process.env.MARK_AS_FINISHED_TIME_DIFFERENCE!!);
@@ -308,10 +309,13 @@ export async function markAsFinished(currentDate: Date) {
         interview.date.getTime() + MARK_AS_FINISHED_TIME_DIFFERENCE <= currentDate.getTime()
     );
 
-    interviewsToMarkAsFinished.forEach((interview) => {
-      console.log(`Interview (${interview._id}) marked as finished`);
-      interview.status = InterviewStatus.Finished;
-    });
+    await Promise.all(
+      interviewsToMarkAsFinished.map(async (interview) => {
+        console.log(`Interview (${interview._id}) marked as finished`);
+        interview.status = InterviewStatus.Finished;
+        handleSendingMarkedAsFinishedInterviewEmails(interview);
+      })
+    );
 
     await InterviewModel.bulkSave(interviewsToMarkAsFinished);
   } catch (error) {
@@ -333,10 +337,13 @@ export async function markAsRejected(currentDate: Date) {
       );
     });
 
-    interviewsToMarkAsRejected.forEach((interview) => {
-      console.log(`Interview (${interview._id}) marked as rejected`);
-      interview.status = InterviewStatus.Rejected;
-    });
+    await Promise.all(
+      interviewsToMarkAsRejected.map(async (interview) => {
+        console.log(`Interview (${interview._id}) marked as rejected`);
+        interview.status = InterviewStatus.Rejected;
+        handleSendingMarkedAsRejectedInterviewEmails(interview);
+      })
+    );
 
     await InterviewModel.bulkSave(interviewsToMarkAsRejected);
   } catch (error) {
@@ -466,6 +473,70 @@ export async function handleSendingPendedInterviewEmails(
 ) {
   try {
     emailService.sendPendedInterviewEmails(interviewer, interviewee, interview);
+  } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
+export async function handleSendingMarkedAsRejectedInterviewEmails(interview: IInterview) {
+  try {
+    const [interviewer, interviewee] = await Promise.all([
+      await userService.getById(interview.interviewer),
+      await userService.getById(interview.interviewee),
+    ]);
+    emailService.sendRejectedInterviewEmails(interviewer, interviewee, interview, true);
+  } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
+export async function handleSendingMarkedAsFinishedInterviewEmails(interview: IInterview) {
+  try {
+    const [interviewer, interviewee] = await Promise.all([
+      await userService.getById(interview.interviewer),
+      await userService.getById(interview.interviewee),
+    ]);
+    emailService.sendFinishedInterviewEmails(interviewer, interviewee, interview);
+  } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
+export async function getAllByStatusAndType(user: AuthenticatedUser, status: InterviewStatus, type: InterviewType) {
+  try {
+    let interviews = null;
+
+    if (type === InterviewType.Made && user.role === Role.Interviewee) {
+      throw ApiError.badRequest('Cannot get interviews made, interviewee role is not allowed to make interviews');
+    }
+
+    if (type === InterviewType.Had) {
+      interviews = await InterviewModel.find({ interviewee: user._id, status: status });
+    } else {
+      interviews = await InterviewModel.find({ interviewer: user._id, status: status });
+    }
+
+    return interviews;
+  } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
+export async function getAllFinishedInterviewsByType(user: IUser, type: InterviewType) {
+  try {
+    let interviews = null;
+
+    if (type === InterviewType.Made && user.role === Role.Interviewee) {
+      throw ApiError.badRequest('Cannot get interviews made, interviewee role is not allowed to make interviews');
+    }
+
+    if (type === InterviewType.Had) {
+      interviews = await InterviewModel.find({ interviewee: user._id, status: InterviewStatus.Finished });
+    } else {
+      interviews = await InterviewModel.find({ interviewer: user._id, status: InterviewStatus.Finished });
+    }
+
+    return interviews;
   } catch (error) {
     throw ApiError.from(error);
   }

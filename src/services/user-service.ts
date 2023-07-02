@@ -19,6 +19,7 @@ import { AuthenticatedUser } from '../utils/authenticated-user-type';
 import * as jwt from '../utils/jwt';
 import { hasOverlappingTimeslots } from '../utils/time-slots';
 import * as emailPublisherService from './email-publisher-service';
+import { InterviewType } from '../enums/interview-type-enum';
 
 export async function getAll() {
   try {
@@ -106,11 +107,40 @@ export async function getProfile(username: string) {
   }
 }
 
+export async function getMyProfile(user: AuthenticatedUser) {
+  try {
+    let interviewsWithReviews = null;
+    let rating = null;
+
+    if (user.role === Role.Interviewer) {
+      interviewsWithReviews = await interviewService.getInterviewsMadeWithReviews(user);
+      rating = await getRatingForInterviewer(user, interviewsWithReviews);
+    } else {
+      interviewsWithReviews = await interviewService.getInterviewsHadWithReviews(user);
+      rating = await getRatingForInterviewee(user, interviewsWithReviews);
+    }
+
+    return { ...user.toObject(), rating: rating };
+  } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
 export async function search(searchCriteria: any) {
   try {
     if (!searchCriteria['info.skills'] && !searchCriteria['fullTextSearch']) {
       let users = await getAll();
       users = users.filter((user) => user.role === Role.Interviewer && user.info);
+
+      users = await Promise.all(
+        users.map(async (user) => {
+          const interviewsMadeWithReviews: any[] = await interviewService.getInterviewsMadeWithReviews(user);
+          const rating = await getRatingForInterviewer(user, interviewsMadeWithReviews);
+          const currentUser = { ...user.toObject(), rating: rating };
+          return currentUser;
+        }) as any
+      );
+
       return users;
     }
 
@@ -412,7 +442,8 @@ export async function editTimeslots(user: AuthenticatedUser, timeslots: ITimeslo
     }
 
     user.info.timeslots = timeslots;
-    await user.save();
+    const updatedUser = await user.save();
+    return updatedUser;
   } catch (error) {
     throw ApiError.from(error);
   }
@@ -613,6 +644,16 @@ export async function saveMerchantId(user: AuthenticatedUser, merchantId: string
     user.info.merchantId = merchantId;
     const updatedUser = await user.save();
     return updatedUser;
+  } catch (error) {
+    throw ApiError.from(error);
+  }
+}
+
+export async function getAllFinishedInterviewsByType(username: string, type: InterviewType) {
+  try {
+    const user = await getByUserName(username);
+    let interviews = await interviewService.getAllFinishedInterviewsByType(user, type);
+    return interviews;
   } catch (error) {
     throw ApiError.from(error);
   }
