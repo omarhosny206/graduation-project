@@ -27,7 +27,9 @@ services:
     image: nginx:latest
     restart: always
     volumes:
-      - ./nginx/nginx.prod.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx/nginx.prod.conf:/etc/nginx/templates/default.conf.template
+    env_file:
+      - ./.env
     ports:
       - "80:80"
     depends_on:
