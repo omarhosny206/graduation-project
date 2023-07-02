@@ -18,6 +18,7 @@ import { AuthenticatedUser } from '../utils/authenticated-user-type';
 import * as jwt from '../utils/jwt';
 import { hasOverlappingTimeslots } from '../utils/time-slots';
 import * as emailPublisherService from './email-publisher-service';
+import { InterviewType } from '../enums/interview-type-enum';
 
 export async function getAll() {
   try {
@@ -647,7 +648,7 @@ export async function saveMerchantId(user: AuthenticatedUser, merchantId: string
   }
 }
 
-export async function getAllFinishedInterviewsByType(username: string, type: string) {
+export async function getAllFinishedInterviewsByType(username: string, type: InterviewType) {
   try {
     const user = await getByUserName(username);
     let interviews = await interviewService.getAllFinishedInterviewsByType(user, type);

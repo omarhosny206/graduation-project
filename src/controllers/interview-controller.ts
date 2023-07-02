@@ -7,6 +7,7 @@ import IInterviewInfo from '../interfaces/interviews/interview-info-interface';
 import IInterview from '../interfaces/interviews/interview-interface';
 import IReview from '../interfaces/interviews/review-interface';
 import * as interviewService from '../services/interview-service';
+import { InterviewType } from '../enums/interview-type-enum';
 
 export async function getAll(req: Request, res: Response, next: NextFunction) {
   try {
@@ -123,7 +124,7 @@ export async function reject(req: Request, res: Response, next: NextFunction) {
 export async function getAllByStatusAndType(req: Request, res: Response, next: NextFunction) {
   try {
     const status = req.query.status as InterviewStatus;
-    const type = req.query.type as string;
+    const type = req.query.type as InterviewType;
     const authenticatedUser = req.authenticatedUser;
     const interviews = await interviewService.getAllByStatusAndType(authenticatedUser, status, type);
     return res.status(StatusCode.Ok).json(interviews);
