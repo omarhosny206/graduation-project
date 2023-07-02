@@ -17,7 +17,7 @@ services:
     image: nginx:latest
     restart: always
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/templates/default.conf.template
+      - ./nginx/nginx.conf.template:/etc/nginx/templates/default.conf.template
     env_file:
       - ./.env
     ports:
