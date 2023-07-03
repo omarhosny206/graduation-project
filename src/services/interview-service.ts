@@ -1,6 +1,7 @@
 import { Types } from 'mongoose';
 
 import { InterviewStatus } from '../enums/interview-status-enum';
+import { InterviewType } from '../enums/interview-type-enum';
 import { Role } from '../enums/role-enum';
 import IInterviewInfo from '../interfaces/interviews/interview-info-interface';
 import IInterview from '../interfaces/interviews/interview-interface';
@@ -14,7 +15,6 @@ import * as videoMeetingService from '../services/video-meeting-service';
 import ApiError from '../utils/api-error';
 import { AuthenticatedUser } from '../utils/authenticated-user-type';
 import { Interview } from '../utils/interview-type';
-import { InterviewType } from '../enums/interview-type-enum';
 
 const MARK_AS_REJECTED_TIME_DIFFERENCE = Number.parseInt(process.env.MARK_AS_REJECTED_TIME_DIFFERENCE!!);
 const MARK_AS_FINISHED_TIME_DIFFERENCE = Number.parseInt(process.env.MARK_AS_FINISHED_TIME_DIFFERENCE!!);
@@ -511,9 +511,9 @@ export async function getAllByStatusAndType(user: AuthenticatedUser, status: Int
     }
 
     if (type === InterviewType.Had) {
-      interviews = await InterviewModel.find({ interviewee: user._id, status: status });
+      interviews = await InterviewModel.find({ interviewee: user._id, status: status }).populate('interviewer interviewee');
     } else {
-      interviews = await InterviewModel.find({ interviewer: user._id, status: status });
+      interviews = await InterviewModel.find({ interviewer: user._id, status: status }).populate('interviewer interviewee');
     }
 
     return interviews;
@@ -531,9 +531,9 @@ export async function getAllFinishedInterviewsByType(user: IUser, type: Intervie
     }
 
     if (type === InterviewType.Had) {
-      interviews = await InterviewModel.find({ interviewee: user._id, status: InterviewStatus.Finished });
+      interviews = await InterviewModel.find({ interviewee: user._id, status: InterviewStatus.Finished }).populate('interviewer interviewee');
     } else {
-      interviews = await InterviewModel.find({ interviewer: user._id, status: InterviewStatus.Finished });
+      interviews = await InterviewModel.find({ interviewer: user._id, status: InterviewStatus.Finished }).populate('interviewer interviewee');
     }
 
     return interviews;
