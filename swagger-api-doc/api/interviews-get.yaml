@@ -1,0 +1,128 @@
+openapi: 3.0.0
+
+paths:
+  /interviews:
+    get:
+      summary: Get interviews by type and status
+      description: Retrieve interviews based on the specified type and status.
+      tags:
+        - interviews
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: query
+          name: type
+          required: true
+          schema:
+            type: string
+            enum:
+              - had
+              - made
+        - in: query
+          name: status
+          required: true
+          schema:
+            type: string
+            enum:
+              - pending
+              - confirmed
+              - rejected
+              - finished
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Interview'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseError'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseError'
+  /interviews/{_id}:
+    get:
+      summary: Get interview profile
+      description: Retrieve the profile of a specific interview.
+      tags:
+        - interviews
+      parameters:
+        - in: path
+          name: _id
+          required: true
+          schema:
+            type: string
+            pattern: '^[a-fA-F0-9]{24}$'
+            format: objectid
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Interview'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseError'
+  /interviews/interviews-made/{username}:
+    get:
+      summary: Get interviews made of a user
+      description: Retrieve the interviews made of a specific user.
+      tags:
+        - interviews
+      parameters:
+        - in: path
+          name: username
+          required: true
+          schema:
+            type: string
+          description: The username of the user
+      responses:
+        '200':
+          description: successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Interview'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseError'
+  /interviews/interviews-had/{username}:
+    get:
+      summary: Get interviews had of a user
+      description: Retrieve the interviews had of a specific user.
+      tags:
+        - interviews
+      parameters:
+        - in: path
+          name: username
+          required: true
+          schema:
+            type: string
+          description: The username of the user
+      responses:
+        '200':
+          description: successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Interview'

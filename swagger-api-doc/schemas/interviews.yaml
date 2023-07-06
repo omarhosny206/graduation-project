@@ -82,3 +82,74 @@ components:
         feedback:
           type: string
           description: The feedback provided in the review
+
+    InterviewBookingRequest:
+      type: object
+      properties:
+        interviewer:
+          type: string
+          pattern: '^[a-fA-F0-9]{24}$'
+          format: objectid
+          description: The ID of the interviewer
+        interviewee:
+          type: string
+          pattern: '^[a-fA-F0-9]{24}$'
+          format: objectid
+          description: The ID of the interviewee
+        date:
+          type: string
+          format: date-time
+          description: The date of the interview
+      required:
+        - interviewer
+        - interviewee
+        - date
+
+    InterviewUpdateRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          description: The title of the interview
+        summary:
+          type: string
+          description: The summary of the interview
+        tags:
+          type: array
+          items:
+            type: string
+          description: Tags associated with the interview
+        youtubeUrl:
+          type: string
+          description: The URL of the YouTube video
+      required:
+        - title
+        - summary
+        - tags
+    
+    InterviewUpdateReviewRequest:
+      type: object
+      properties:
+        from:
+          type: string
+          pattern: '^[a-fA-F0-9]{24}$'
+          format: objectid
+          description: The ID of the user providing the review
+        to:
+          type: string
+          pattern: '^[a-fA-F0-9]{24}$'
+          format: objectid
+          description: The ID of the user receiving the review
+        feedback:
+          type: string
+          description: The feedback provided in the review
+        rating:
+          type: integer
+          minimum: 0
+          maximum: 5
+          description: The rating given in the review
+      required:
+        - from
+        - to
+        - feedback
+        - rating
