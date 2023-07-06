@@ -1,0 +1,19 @@
+components:
+  schemas:
+    TokenRequest:
+      type: object
+      properties:
+        refreshToken:
+          type: string
+          format: jwt
+      required:
+        - refreshToken
+    TokenResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          format: jwt
+        refreshToken:
+          type: string
+          format: jwt
