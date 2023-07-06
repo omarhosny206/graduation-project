@@ -1,0 +1,8 @@
+components:
+  schemas:
+    ResponseMessage:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The message indicating successful response
