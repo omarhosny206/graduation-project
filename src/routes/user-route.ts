@@ -33,9 +33,9 @@ router.get(
   authorization.authorizeByRole(Role.Interviewer),
   userController.getInterviewsMadeGroupedByStatus
 );
-router.get('/interviews-made/:username', userController.getInterviewsMade);
+router.get('/:username/interviews-made', userController.getInterviewsMade);
 router.get('/interviews-had', authentication.authenticateByAccessToken, userController.getInterviewsHadGroupedByStatus);
-router.get('/interviews-had/:username', userController.getInterviewsHad);
+router.get('/:username/interviews-had', userController.getInterviewsHad);
 router.get(
   '/:username/interviews/finished',
   queryStringValidator.validate(interviewTypeQueryStringSchema, 'type'),
