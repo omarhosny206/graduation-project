@@ -1,0 +1,84 @@
+components:
+  schemas:
+    Interview:
+      type: object
+      properties:
+        interviewee:
+          type: string
+          pattern: '^[a-fA-F0-9]{24}$'
+          format: objectid
+          description: The ID of the interviewee user
+        interviewer:
+          type: string
+          pattern: '^[a-fA-F0-9]{24}$'
+          format: objectid
+          description: The ID of the interviewer user
+        date:
+          type: string
+          format: date-time
+          description: The date of the interview
+        meetingUrl:
+          type: string
+          description: The URL of the meeting
+        info:
+          $ref: '#/components/schemas/InterviewInfo'
+        price:
+          type: number
+          minimum: 0
+          description: The price of the interview
+        isPaid:
+          type: boolean
+          description: Indicates if the interview is paid successfully
+        status:
+          type: string
+          enum:
+            - "pending"
+            - "confirmed"
+            - "rejected"
+            - "finished"
+          description: The status of the interview
+
+    InterviewInfo:
+      type: object
+      properties:
+        title:
+          type: string
+          description: The title of the interview
+        summary:
+          type: string
+          description: The summary of the interview
+        youtubeUrl:
+          type: string
+          description: The URL of the YouTube video
+        tags:
+          type: array
+          items:
+            type: string
+          description: Tags associated with the interview
+        reviews:
+          type: array
+          items:
+            type: object
+            $ref: '#/components/schemas/Review'
+
+    Review:
+      type: object
+      properties:
+        from:
+          type: string
+          pattern: '^[a-fA-F0-9]{24}$'
+          format: objectid
+          description: The ID of the user providing the review
+        to:
+          type: string
+          pattern: '^[a-fA-F0-9]{24}$'
+          format: objectid
+          description: The ID of the user receiving the review
+        rating:
+          type: number
+          minimum: 0
+          maximum: 5
+          description: The rating given in the review
+        feedback:
+          type: string
+          description: The feedback provided in the review
