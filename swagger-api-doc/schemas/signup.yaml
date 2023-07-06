@@ -1,0 +1,31 @@
+components:
+  schemas:
+    SignupRequest:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+          description: |-
+                Password must meet the following requirements:
+                - At least one lowercase letter
+                - At least one uppercase letter
+                - At least one digit
+                - At least one special character among @$!%*?&
+                - Minimum length of 8 characters
+          pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$'
+        role:
+          type: string
+          enum:
+            - interviewer
+            - interviewee
+      required:
+        - email
+        - password
+        - role
+    SignupResponse:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'

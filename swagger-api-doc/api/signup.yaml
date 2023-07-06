@@ -1,0 +1,28 @@
+openapi: 3.0.0
+
+paths:
+  /signup:
+    post:
+      summary: Signup for new user
+      description: Create a new user account
+      tags:
+        - signup
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignupRequest'
+      responses:
+        '201':
+          description: successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignupResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseError'
