@@ -1,0 +1,238 @@
+openapi: 3.0.0
+
+paths:
+  /users:
+    get:
+      summary: Get all users
+      description: Returns a list of all users.
+      tags:
+        - users
+      responses:
+        '200':
+          description: successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+  /users/fixed:
+    get:
+      summary: Get all fixed schema of users
+      description: Returns a list of categorized users according to a predefined schema.
+      tags:
+        - users
+      responses:
+        '200':
+          description: successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                $ref: '#/components/schemas/FixedUsers'
+  /users/{username}:
+    get:
+      summary: Get user profile
+      description: Returns the profile of a specific user.
+      tags:
+        - users
+      parameters:
+        - in: path
+          name: username
+          description: The username of the user.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseError'
+  /users/profile:
+    get:
+      summary: Get my profile
+      description: Returns the authenticated user's profile.
+      tags:
+        - users
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseError'
+  /users/search:
+    get:
+      summary: Search users
+      description: Search for users based on skills and full-text search
+      tags:
+        - users
+      parameters:
+        - in: query
+          name: info.skills
+          schema:
+            type: string
+          description: Skills to filter users by
+        - in: query
+          name: fullTextSearch
+          schema:
+            type: string
+          description: Search in users' bio, first name, last name
+      responses:
+        '200':
+          description: successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+  /users/{username}/interviews-made:
+    get:
+      summary: Get interviews made of a user
+      description: Retrieve the interviews made of a specific user.
+      tags:
+        - users
+      parameters:
+        - in: path
+          name: username
+          required: true
+          schema:
+            type: string
+          description: The username of the user
+      responses:
+        '200':
+          description: successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Interview'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseError'
+  /users/{username}/interviews-had:
+    get:
+      summary: Get interviews had of a user
+      description: Retrieve the interviews had of a specific user.
+      tags:
+        - users
+      parameters:
+        - in: path
+          name: username
+          required: true
+          schema:
+            type: string
+          description: The username of the user
+      responses:
+        '200':
+          description: successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Interview'
+  /users/interviews-made:
+    get:
+      summary: Get interviews made of a the authenticated user
+      description: Retrieve the interviews made of a authenticated user.
+      tags:
+        - users
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Interview'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseError'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseError'
+  /users/interviews-had:
+    get:
+      summary: Get interviews had of a the authenticated user
+      description: Retrieve the interviews had of a authenticated user.
+      tags:
+        - users
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Interview'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseError'
+  /users/{username}/interviews/finished:
+    get:
+      summary: Get finished-interviews had or made of user
+      description: Retrieve finished-interviews had or made of a specific user
+      tags:
+        - users
+      parameters:
+        - in: query
+          name: type
+          schema:
+            type: string
+            enum:
+              - "had"
+              - "made"
+            description: The type of the interview
+          required: true
+      responses:
+        '200':
+          description: successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Interview'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseError'

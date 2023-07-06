@@ -1,0 +1,295 @@
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        _id:
+          type: string
+          pattern: '^[a-fA-F0-9]{24}$'
+          format: objectid
+        email:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+        confirmed:
+          type: boolean
+        active:
+          type: boolean
+        role:
+          type: string
+        info:
+          $ref: '#/components/schemas/UserInfo'
+        imageKey:
+          type: string
+        imageUrl:
+          type: string
+
+    UserInfo:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        price:
+          type: number
+        priceable:
+          type: boolean
+        skills:
+          type: array
+          items:
+            type: string
+        bio:
+          type: string
+        levelOfExperience:
+          type: string
+        interviewsHad:
+          type: array
+          items:
+            type: string
+            pattern: '^[a-fA-F0-9]{24}$'
+            format: objectid
+        interviewsMade:
+          type: array
+          items:
+            type: string
+            pattern: '^[a-fA-F0-9]{24}$'
+            format: objectid
+        timeslots:
+          type: array
+          items:
+            $ref: '#/components/schemas/Timeslot'
+          minItems: 7
+          maxItems: 7
+          uniqueItems: true
+        devicesTokens:
+          type: array
+          items:
+            type: string
+        socials:
+          $ref: '#/components/schemas/UserSocials'
+
+    UserSocials:
+      type: object
+      properties:
+        linkedin:
+          type: string
+        github:
+          type: string
+        twitter:
+          type: string
+    
+    UserUpdateRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        bio:
+          type: string
+        levelOfExperience:
+          type: string
+          enum:
+            - "junior"
+            - "mid-level"
+            - "senior"
+            - "tech-lead"
+            - "staff"
+            - "principal"
+            - "architect"
+      required:
+        - firstName
+        - lastName
+        - levelOfExperience
+
+    UserUpdatePriceRequest:
+      type: object
+      properties:
+        price:
+          type: number
+          minimum: 5
+      required:
+        - price
+
+    UserUpdateSkillsRequest:
+      type: object
+      properties:
+        skills:
+          type: array
+          items:
+            type: string
+            enum:
+              - "DSA"
+              - "System Design"
+              - "Frontend"
+              - "Backend"
+              - "IOS"
+              - "Android"
+              - "Flutter"
+              - "Data Science"
+              - "Devops"
+              - "Security"
+              - "AI"
+              - "Big Data"
+      required:
+        - skills
+
+    UserUpdateSocialsRequest:
+      type: object
+      properties:
+        linkedin:
+          type: string
+        github:
+          type: string
+        twitter:
+          type: string
+      required:
+        - linkedin
+        - github
+        - twitter
+
+    UserUpdateUsernameRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          format: email
+      required:
+        - username
+    
+    UserUpdateTimeslotsRequest:
+      type: object
+      properties:
+        timeslots:
+          type: array
+          items:
+            $ref: '#/components/schemas/Timeslot'
+          minItems: 7
+          maxItems: 7
+          uniqueItems: true
+      required:
+        - timeslots
+
+    UserUpdatePasswordRequest:
+      type: object
+      properties:
+        oldPassword:
+          type: string
+          description: |-
+                Password must meet the following requirements:
+                - At least one lowercase letter
+                - At least one uppercase letter
+                - At least one digit
+                - At least one special character among @$!%*?&
+                - Minimum length of 8 characters
+          pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$'
+        newPassword:
+          type: string
+          description: |-
+                Password must meet the following requirements:
+                - At least one lowercase letter
+                - At least one uppercase letter
+                - At least one digit
+                - At least one special character among @$!%*?&
+                - Minimum length of 8 characters
+          pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$'
+        confirmPassword:
+          type: string
+          description: |-
+                Password must meet the following requirements:
+                - At least one lowercase letter
+                - At least one uppercase letter
+                - At least one digit
+                - At least one special character among @$!%*?&
+                - Minimum length of 8 characters
+                - Should match with newPassword
+          pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$'
+      required:
+        - oldPassword
+        - newPassword
+        - confirmPassword
+
+    UserResetPasswordRequest:
+      type: object
+      properties:
+        newPassword:
+            type: string
+            description: |-
+                  Password must meet the following requirements:
+                  - At least one lowercase letter
+                  - At least one uppercase letter
+                  - At least one digit
+                  - At least one special character among @$!%*?&
+                  - Minimum length of 8 characters
+            pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$'
+        confirmPassword:
+          type: string
+          description: |-
+                Password must meet the following requirements:
+                - At least one lowercase letter
+                - At least one uppercase letter
+                - At least one digit
+                - At least one special character among @$!%*?&
+                - Minimum length of 8 characters
+                - Should match with newPassword
+          pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$'
+      required:
+        - newPassword
+        - confirmPassword
+
+    Timeslot:
+      type: object
+      properties:
+        day:
+          type: integer
+          minimum: 0
+          maximum: 6
+        hours:
+          type: array
+          items:
+            type: string
+            pattern: '^([0-1][0-9]|2[0-3]):[0-5][0-9]$'
+      required:
+        - day
+        - hours
+
+    FixedUsers:
+      type: object
+      properties:
+        free:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        priceable:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        dsa:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        systemDesign:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+
+    ForgotPasswordRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+      required:
+        - email
+
+    CheckEmailUpdateRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+      required:
+        - email

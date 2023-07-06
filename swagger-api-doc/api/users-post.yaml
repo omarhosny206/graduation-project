@@ -1,0 +1,152 @@
+openapi: 3.0.0
+
+paths:
+  /users/email/confirmation/{emailConfirmationToken}:
+    post:
+      summary: Confirm user email
+      description: Confirm the user's email using the provided email confirmation token.
+      tags:
+        - users
+      parameters:
+        - in: path
+          name: emailConfirmationToken
+          schema:
+            type: string
+          required: true
+          description: The email confirmation token
+      responses:
+        '200':
+          description: successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseError'
+  /users/forgot-password:
+    post:
+      summary: Forgot password
+      description: Send an email to reset the user's password.
+      tags:
+        - users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForgotPasswordRequest'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseError'
+  /users/email:
+    post:
+      summary: Check email availability to update user's email
+      description: Check email availability and send email to this email.
+      tags: 
+        - users
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckEmailUpdateRequest'
+      responses:
+        '200':
+          description: successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseError'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseError'
+  /users/pricing:
+    post:
+      summary: Request pricing eligibility
+      description: Check the pricing eligibility for the user.
+      tags:
+        - users
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseError'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseError'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseError'
+  /users/image:
+    post:
+      summary: Upload user's image
+      description: Upload a user's image using form-data.
+      tags:
+        - users
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: The user's image file
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseError'

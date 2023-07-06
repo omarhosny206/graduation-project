@@ -1,0 +1,24 @@
+openapi: 3.0.0
+
+paths:
+  /users/image:
+    delete:
+      summary: Delete user's image
+      description: Delete a user's image.
+      tags:
+        - users
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseError'
