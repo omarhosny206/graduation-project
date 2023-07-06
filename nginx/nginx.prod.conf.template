@@ -10,6 +10,10 @@ server {
         proxy_pass ${CONTAINER_APP_URL};
     }
 
+    location /api/docs {
+        proxy_pass ${CONTAINER_APP_URL};
+    }
+
     location /rabbitmq {
         rewrite ^/rabbitmq$ /rabbitmq/ permanent;
         rewrite ^/rabbitmq/(.*)$ /$1 break;
