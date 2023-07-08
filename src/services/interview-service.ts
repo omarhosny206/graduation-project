@@ -484,7 +484,7 @@ export async function handleSendingMarkedAsRejectedInterviewEmails(interview: II
       await userService.getById(interview.interviewer),
       await userService.getById(interview.interviewee),
     ]);
-    emailService.sendRejectedInterviewEmails(interviewer, interviewee, interview, true);
+    emailService.sendRejectedInterviewEmails(interviewer, interviewee, interview, true, true);
   } catch (error) {
     throw ApiError.from(error);
   }

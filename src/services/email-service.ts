@@ -92,14 +92,16 @@ export async function sendRejectedInterviewEmails(
   interviewer: IUser,
   interviewee: IUser,
   interview: IInterview,
-  rejectedByInterviewer: boolean
+  rejectedByInterviewer: boolean,
+  notPaid?: boolean
 ) {
   try {
     const [interviewerMailOptions, intervieweeMailOptions] = await getRejectedInterviewMailOptions(
       interviewer,
       interviewee,
       interview,
-      rejectedByInterviewer
+      rejectedByInterviewer,
+      notPaid
     );
     await Promise.all([transporter.sendMail(interviewerMailOptions), transporter.sendMail(intervieweeMailOptions)]);
   } catch (error) {
@@ -189,13 +191,16 @@ export async function getRejectedInterviewMailOptions(
   interviewer: IUser,
   interviewee: IUser,
   interview: IInterview,
-  rejectedByInterviewer: boolean
+  rejectedByInterviewer: boolean,
+  notPaid?: boolean
 ) {
   try {
     let subject = `[Pass] Interview status [REJECTED`;
     let body = `<a href="http://localhost:8080/api/v1/interviews/${interview._id}"> Interview </a> <p>Interviewer: <a href="http://localhost:8080/api/v1/users/${interviewer.username}"> ${interviewer.username} </a></p> <p>Interviewee: <a href="http://localhost:8080/api/v1/users/${interviewee.username}"> ${interviewee.username}`;
 
-    if (rejectedByInterviewer) {
+    if (notPaid) {
+      subject = subject.concat(' - Non-Payment of Interview Fees]');
+    } else if (rejectedByInterviewer) {
       subject = subject.concat(' by Interviewer]');
     } else {
       subject = subject.concat(' by Interviewee]');
