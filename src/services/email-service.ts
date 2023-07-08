@@ -199,7 +199,7 @@ export async function getRejectedInterviewMailOptions(
     let body = `<a href="http://localhost:8080/api/v1/interviews/${interview._id}"> Interview </a> <p>Interviewer: <a href="http://localhost:8080/api/v1/users/${interviewer.username}"> ${interviewer.username} </a></p> <p>Interviewee: <a href="http://localhost:8080/api/v1/users/${interviewee.username}"> ${interviewee.username}`;
 
     if (notPaid) {
-      subject = subject.concat(' - Non-Payment of Interview Fees]');
+      subject = subject.concat(' due to Non-Payment of Interview Fees]');
     } else if (rejectedByInterviewer) {
       subject = subject.concat(' by Interviewer]');
     } else {
