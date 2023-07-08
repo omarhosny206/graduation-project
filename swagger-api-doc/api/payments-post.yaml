@@ -1,0 +1,67 @@
+openapi: 3.0.0
+
+paths:
+  /payments/orders:
+    post:
+      summary: Create Payment Order
+      description: Create a new payment order.
+      tags:
+        - payments
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentOrderRequest'
+      responses:
+        '200':
+          description: Successful response
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseError'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseError'
+  /payments/orders/{orderId}/capture:
+    post:
+      summary: Capture Payment Order
+      description: Capture a payment for the specified order.
+      tags:
+        - payments
+      parameters:
+        - in: path
+          name: orderId
+          required: true
+          schema:
+            type: string
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentCaptureRequest'
+      responses:
+        '201':
+          description: Successful response
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseError'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseError'

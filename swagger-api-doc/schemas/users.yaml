@@ -45,6 +45,8 @@ components:
           type: string
         levelOfExperience:
           type: string
+        merchantId:
+          type: string
         interviewsHad:
           type: array
           items:

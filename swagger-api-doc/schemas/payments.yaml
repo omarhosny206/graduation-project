@@ -1,0 +1,35 @@
+components:
+  schemas:
+    OnboardingFinishRequest:
+      type: object
+      properties:
+        merchantId:
+          type: string
+      required:
+        - merchantId
+      example:
+        merchantId: C3RXSLK5PT66U
+    
+    PaymentOrderRequest:
+      type: object
+      properties:
+        interviewId:
+          type: string
+          pattern: '^[a-fA-F0-9]{24}$'
+          format: objectid
+      required:
+        - interviewId
+      example:
+        interviewId: 644c216a9e6d2d73453656fb
+      
+    PaymentCaptureRequest:
+      type: object
+      properties:
+        interviewId:
+          type: string
+          pattern: '^[a-fA-F0-9]{24}$'
+          format: objectid
+      required:
+        - interviewId
+      example:
+        interviewId: 644c216a9e6d2d73453656fb

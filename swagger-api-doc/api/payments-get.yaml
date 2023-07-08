@@ -1,0 +1,20 @@
+openapi: 3.0.0
+
+paths:
+  /payments/onboard:
+    get:
+      summary: PayPal Account Onboarding
+      description: Onboard a user on the PayPal Account.
+      tags:
+        - payments
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseError'
