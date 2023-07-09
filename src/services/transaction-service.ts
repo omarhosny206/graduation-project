@@ -11,8 +11,8 @@ export async function save(transaction: ITransaction) {
 
     const interview = await interviewService.getById(transactionToBeSaved.interview as Types.ObjectId);
     interview.isPaid = true;
-    await interview.save();
-    await interviewService.createMeetingUrl(interview);
+    const updatedInterview = await interview.save();
+    await interviewService.createMeetingUrl(updatedInterview);
 
     return transactionToBeSaved;
   } catch (error) {
