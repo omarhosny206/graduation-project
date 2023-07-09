@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt';
 import { Types } from 'mongoose';
 
+import { InterviewType } from '../enums/interview-type-enum';
 import { Role } from '../enums/role-enum';
 import IInterview from '../interfaces/interviews/interview-interface';
 import IFixedUsers from '../interfaces/users/fixed-users-interface';
@@ -18,7 +19,6 @@ import { AuthenticatedUser } from '../utils/authenticated-user-type';
 import * as jwt from '../utils/jwt';
 import { hasOverlappingTimeslots } from '../utils/time-slots';
 import * as emailPublisherService from './email-publisher-service';
-import { InterviewType } from '../enums/interview-type-enum';
 
 export async function getAll() {
   try {
@@ -516,16 +516,20 @@ export async function isEligibleForPricing(user: AuthenticatedUser) {
 
 export async function getRatingForInterviewer(user: IUser, interviewsMadeWithReviews: IInterview[]) {
   try {
-    const interviewerRatings = interviewsMadeWithReviews.map((interview) => {
-      for (const review of interview.info?.reviews!) {
-        if (user._id.equals(review.to)) {
-          return review.rating;
+    const interviewerRatings: any[] = interviewsMadeWithReviews
+      .map((interview) => {
+        for (const review of interview.info?.reviews!) {
+          if (user._id.equals(review.to)) {
+            return review.rating;
+          }
         }
-      }
-    });
+      })
+      .filter((interviewerRating) => !isNaN(interviewerRating!!));
+
+    console.log(interviewerRatings);
 
     const ratingsSum = interviewerRatings.reduce((accumulator, currentVal) => {
-      return accumulator! + currentVal!;
+      return accumulator! + (currentVal! || 0);
     }, 0);
 
     if (ratingsSum === 0) {
@@ -541,16 +545,20 @@ export async function getRatingForInterviewer(user: IUser, interviewsMadeWithRev
 
 export async function getRatingForInterviewee(user: IUser, interviewsHadWithReviews: IInterview[]) {
   try {
-    const intervieweeRatings = interviewsHadWithReviews.map((interview) => {
-      for (const review of interview.info?.reviews!) {
-        if (user._id.equals(review.to)) {
-          return review.rating;
+    const intervieweeRatings: any[] = interviewsHadWithReviews
+      .map((interview) => {
+        for (const review of interview.info?.reviews!) {
+          if (user._id.equals(review.to)) {
+            return review.rating;
+          }
         }
-      }
-    });
+      })
+      .filter((interviewerRating) => !isNaN(interviewerRating!!));
+
+    console.log(intervieweeRatings);
 
     const ratingsSum = intervieweeRatings.reduce((accumulator, currentVal) => {
-      return accumulator! + currentVal!;
+      return accumulator! + (currentVal! || 0);
     }, 0);
 
     if (ratingsSum === 0) {
