@@ -21,7 +21,7 @@ const interviewSchema = new Schema<IInterview>(
             {
               from: { type: Schema.Types.ObjectId, ref: 'User', required: true },
               to: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-              rating: { type: Number, required: true, min: 0, max: 5 },
+              rating: { type: Number, required: true, min: 1, max: 5 },
               feedback: { type: String, required: true },
             },
           ],
