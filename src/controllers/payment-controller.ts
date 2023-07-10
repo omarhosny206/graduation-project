@@ -29,9 +29,10 @@ export async function finishOnboarding(req: Request, res: Response, next: NextFu
 
 export async function createOrder(req: Request, res: Response, next: NextFunction) {
   try {
-    const { _id } = req.body;
-    const interview = await interviewService.getById(_id);
+    const { interviewId } = req.body;
+    const interview = await interviewService.getById(interviewId);
     const order = await paymentService.createOrder(interview);
+    console.log(order);
     res.status(StatusCode.Ok).json(order);
   } catch (error) {
     next(error);
