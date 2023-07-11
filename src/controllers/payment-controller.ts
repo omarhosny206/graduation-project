@@ -48,7 +48,7 @@ export async function capturePayment(req: Request, res: Response, next: NextFunc
     const capturedPayment = await paymentService.capturePayment(orderId);
     const transaction = <ITransaction> {
       paypalId: capturedPayment.id,
-      interview: new Types.ObjectId('644c216a9e6d2d73453656fb'),
+      interview: new Types.ObjectId(interviewId),
       payer: capturedPayment.payment_source.paypal.email_address,
       payee: capturedPayment.purchase_units[0].payment_instruction.platform_fees[0].payee.email_address,
       currencyCode: capturedPayment.purchase_units[0].payment_instruction.platform_fees[0].amount.currency_code,
