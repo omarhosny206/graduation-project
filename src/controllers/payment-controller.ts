@@ -32,6 +32,7 @@ export async function finishOnboarding(req: Request, res: Response, next: NextFu
 export async function createOrder(req: Request, res: Response, next: NextFunction) {
   try {
     const { interviewId } = req.body;
+    console.log(interviewId)
     const interview = await interviewService.getById(interviewId);
     const order = await paymentService.createOrder(interview);
     console.log(order);
@@ -45,6 +46,8 @@ export async function capturePayment(req: Request, res: Response, next: NextFunc
   try {
     const { orderId } = req.params;
     const { interviewId } = req.body;
+    console.log('Interview Id',interviewId);
+    console.log('Order Id', orderId);
     const capturedPayment = await paymentService.capturePayment(orderId);
     const transaction = <ITransaction> {
       paypalId: capturedPayment.id,
