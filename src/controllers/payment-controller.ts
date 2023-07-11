@@ -19,7 +19,9 @@ export async function onboardUser(req: Request, res: Response, next: NextFunctio
 
 export async function finishOnboarding(req: Request, res: Response, next: NextFunction) {
   try {
-    const { authenticatedUser, merchantId } = req.body;
+    const authenticatedUser = req.authenticatedUser;
+    const { merchantId } = req.body;
+    console.log(authenticatedUser);
     const updatedUser = await paymentService.finishOnboarding(authenticatedUser, merchantId);
     return res.status(StatusCode.Ok).json(updatedUser);
   } catch (error) {
@@ -46,7 +48,7 @@ export async function capturePayment(req: Request, res: Response, next: NextFunc
     const capturedPayment = await paymentService.capturePayment(orderId);
     const transaction = <ITransaction> {
       paypalId: capturedPayment.id,
-      interview: new Types.ObjectId(interviewId),
+      interview: new Types.ObjectId('644c216a9e6d2d73453656fb'),
       payer: capturedPayment.payment_source.paypal.email_address,
       payee: capturedPayment.purchase_units[0].payment_instruction.platform_fees[0].payee.email_address,
       currencyCode: capturedPayment.purchase_units[0].payment_instruction.platform_fees[0].amount.currency_code,
