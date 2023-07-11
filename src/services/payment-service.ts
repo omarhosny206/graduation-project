@@ -59,7 +59,7 @@ export async function onboardUser() {
       ],
       partner_config_override: {
         partner_logo_url: 'https://www.paypalobjects.com/webstatic/mktg/logo/pp_cc_mark_111x69.jpg',
-        return_url: 'http://localhost:3000/users/settings', 
+        return_url: 'http://localhost:3000/users/onboarding/', 
         return_url_description: 'the url to return the merchant after the paypal onboarding process.',
         show_add_credit_card: true,
       },
