@@ -138,11 +138,11 @@ export async function getVideoMeetingMailOptions(interviewer: IUser, interviewee
   try {
     const date = new Date(interview.date.getTime() + INTERVIEW_MEETING_URL_TIME_DIFFERENCE);
     const subject = '[Pass] Interview Video Meeting';
-    const body = `<a href="http://localhost:8080/api/v1/interviews/${
+    const body = `<a href="http://localhost:3000/interviews/${
       interview._id
-    }"> Interview </a> <p>Interviewer: <a href="http://localhost:8080/api/v1/users/${interviewer.username}"> ${
+    }"> Interview </a> <p>Interviewer: <a href="http://localhost:3000/users/${interviewer.username}"> ${
       interviewer.username
-    } </a></p> <p>Interviewee: <a href="http://localhost:8080/api/v1/users/${interviewee.username}"> ${
+    } </a></p> <p>Interviewee: <a href="http://localhost:3000/users/${interviewee.username}"> ${
       interviewee.username
     } </a></p> <b><a href=${interview.meetingUrl}> Meeting URL </a></b> <p>Date: ${dateFormatter.format(
       date
@@ -159,8 +159,8 @@ export async function getVideoMeetingMailOptions(interviewer: IUser, interviewee
 export async function getPendedInterviewMailOptions(interviewer: IUser, interviewee: IUser, interview: IInterview) {
   try {
     const subject = `[Pass] Interview has been booked with status [PENDING]`;
-    const interviewerBody = `<a href="http://localhost:8080/api/v1/interviews/${interview._id}"> Interview </a> <p>Interviewer: <a href="http://localhost:8080/api/v1/users/${interviewer.username}"> ${interviewer.username} </a></p> <p>Interviewee: <a href="http://localhost:8080/api/v1/users/${interviewee.username}"> ${interviewee.username}</a></p> <p>Note: you can either confirm or reject this interview</p>`;
-    const intervieweeBody = `<a href="http://localhost:8080/api/v1/interviews/${interview._id}"> Interview </a> <p>Interviewer: <a href="http://localhost:8080/api/v1/users/${interviewer.username}"> ${interviewer.username} </a></p> <p>Interviewee: <a href="http://localhost:8080/api/v1/users/${interviewee.username}"> ${interviewee.username}</a></p> <p>Note: you can reject this interview before the interviewer's confirmation</p>`;
+    const interviewerBody = `<a href="http://localhost:8080/api/v1/interviews/${interview._id}"> Interview </a> <p>Interviewer: <a href="http://localhost:3000/users/${interviewer.username}"> ${interviewer.username} </a></p> <p>Interviewee: <a href="http://localhost:3000/users/${interviewee.username}"> ${interviewee.username}</a></p> <p>Note: you can either confirm or reject this interview</p>`;
+    const intervieweeBody = `<a href="http://localhost:8080/api/v1/interviews/${interview._id}"> Interview </a> <p>Interviewer: <a href="http://localhost:3000/users/${interviewer.username}"> ${interviewer.username} </a></p> <p>Interviewee: <a href="http://localhost:3000/users/${interviewee.username}"> ${interviewee.username}</a></p> <p>Note: you can reject this interview before the interviewer's confirmation</p>`;
 
     const interviewerMailOptions = { from: GMAIL_USER, to: interviewer.email, html: interviewerBody, subject: subject };
     const intervieweeMailOptions = { from: GMAIL_USER, to: interviewee.email, html: intervieweeBody, subject: subject };
@@ -173,8 +173,8 @@ export async function getPendedInterviewMailOptions(interviewer: IUser, intervie
 export async function getConfirmedInterviewMailOptions(interviewer: IUser, interviewee: IUser, interview: IInterview) {
   try {
     const subject = `[Pass] Interview status [CONFIRMED]`;
-    let interviewerBody = `<a href="http://localhost:8080/api/v1/interviews/${interview._id}"> Interview </a> <p>Interviewer: <a href="http://localhost:8080/api/v1/users/${interviewer.username}"> ${interviewer.username} </a></p> <p>Interviewee: <a href="http://localhost:8080/api/v1/users/${interviewee.username}"> ${interviewee.username}`;
-    let intervieweeBody = `<a href="http://localhost:8080/api/v1/interviews/${interview._id}"> Interview </a> <p>Interviewer: <a href="http://localhost:8080/api/v1/users/${interviewer.username}"> ${interviewer.username} </a></p> <p>Interviewee: <a href="http://localhost:8080/api/v1/users/${interviewee.username}"> ${interviewee.username}`;
+    let interviewerBody = `<a href="http://localhost:8080/api/v1/interviews/${interview._id}"> Interview </a> <p>Interviewer: <a href="http://localhost:3000/users/${interviewer.username}"> ${interviewer.username} </a></p> <p>Interviewee: <a href="http://localhost:3000/users/${interviewee.username}"> ${interviewee.username}`;
+    let intervieweeBody = `<a href="http://localhost:8080/api/v1/interviews/${interview._id}"> Interview </a> <p>Interviewer: <a href="http://localhost:3000/users/${interviewer.username}"> ${interviewer.username} </a></p> <p>Interviewee: <a href="http://localhost:3000/users/${interviewee.username}"> ${interviewee.username}`;
 
     if (!interview.isPaid) {
       intervieweeBody = intervieweeBody.concat(' <p>PAY NOW!</p>');
@@ -196,7 +196,7 @@ export async function getRejectedInterviewMailOptions(
 ) {
   try {
     let subject = `[Pass] Interview status [REJECTED`;
-    let body = `<a href="http://localhost:8080/api/v1/interviews/${interview._id}"> Interview </a> <p>Interviewer: <a href="http://localhost:8080/api/v1/users/${interviewer.username}"> ${interviewer.username} </a></p> <p>Interviewee: <a href="http://localhost:8080/api/v1/users/${interviewee.username}"> ${interviewee.username}`;
+    let body = `<a href="http://localhost:8080/api/v1/interviews/${interview._id}"> Interview </a> <p>Interviewer: <a href="http://localhost:3000/users/${interviewer.username}"> ${interviewer.username} </a></p> <p>Interviewee: <a href="http://localhost:3000/users/${interviewee.username}"> ${interviewee.username}`;
 
     if (notPaid) {
       subject = subject.concat(' due to Non-Payment of Interview Fees]');
@@ -217,7 +217,7 @@ export async function getRejectedInterviewMailOptions(
 export async function getFinishedInterviewMailOptions(interviewer: IUser, interviewee: IUser, interview: IInterview) {
   try {
     const subject = `[Pass] Interview status [FINISHED]`;
-    let body = `<a href="http://localhost:8080/api/v1/interviews/${interview._id}"> Interview </a> <p>Interviewer: <a href="http://localhost:8080/api/v1/users/${interviewer.username}"> ${interviewer.username} </a></p> <p>Interviewee: <a href="http://localhost:8080/api/v1/users/${interviewee.username}"> ${interviewee.username} <p>Add info and review NOW!!!</p>`;
+    let body = `<a href="http://localhost:8080/api/v1/interviews/${interview._id}"> Interview </a> <p>Interviewer: <a href="http://localhost:3000/users/${interviewer.username}"> ${interviewer.username} </a></p> <p>Interviewee: <a href="http://localhost:3000/users/${interviewee.username}"> ${interviewee.username} <p>Add info and review NOW!!!</p>`;
 
     const interviewerMailOptions = { from: GMAIL_USER, to: interviewer.email, html: body, subject: subject };
     const intervieweeMailOptions = { from: GMAIL_USER, to: interviewee.email, html: body, subject: subject };
