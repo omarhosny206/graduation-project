@@ -5,8 +5,9 @@ import { Role } from '../enums/role-enum';
 import * as authentication from '../middlewares/authentication';
 import * as authorization from '../middlewares/authorization';
 import { multerUploadImage } from '../middlewares/multer';
-import * as validator from '../middlewares/validator';
 import * as queryStringValidator from '../middlewares/query-string-validator';
+import * as validator from '../middlewares/validator';
+import interviewTypeQueryStringSchema from '../validations/interview-type-query-string-schema';
 import userDeleteAccount from '../validations/user-delete-account';
 import userForgotPasswordSchema from '../validations/user-forgot-password-schema';
 import userInfoSchema from '../validations/user-info-schema';
@@ -18,11 +19,10 @@ import userUpdateSkillsSchema from '../validations/user-update-skills-schema';
 import userUpdateSocialsSchema from '../validations/user-update-socials-schema';
 import userUpdateTimeslotsSchema from '../validations/user-update-timeslots-schema';
 import userUpdateUsernameSchema from '../validations/user-update-username-schema';
-import interviewTypeQueryStringSchema from '../validations/interview-type-query-string-schema';
 
 const router: Router = Router();
 
-router.get('/', userController.getAll);
+router.get('/', authentication.authenticateByAccessToken, userController.getAll);
 router.get('/profile', authentication.authenticateByAccessToken, userController.getMyProfile);
 router.get('/fixed', userController.getAllFixed);
 router.get('/notify', userController.notify);
