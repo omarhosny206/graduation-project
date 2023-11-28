@@ -18,7 +18,6 @@
 - Containerization and Orchestration using Docker and Kubernetes.
 - CI/CD on git push using Jenkins.
 
-
 ## Database Design
 ![pass-interviewing-system drawio](https://github.com/omarhosny206/graduation-project/assets/58389695/41ba4172-24e9-40e1-b218-ebde12ee47d7)
 
