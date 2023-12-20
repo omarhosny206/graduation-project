@@ -42,7 +42,7 @@ export async function getInterviewsMade(username: string) {
   try {
     const user = await userService.getByUserName(username);
     if (user.role === Role.Interviewee) {
-      throw ApiError.badRequest('Cannot get interviews made, interviewee role is not allowed to make interviews');
+      throw ApiError.forbidden('Cannot get interviews made, interviewee role is not allowed to make interviews');
     }
     const interviewsHad = await InterviewModel.find({ interviewer: user._id }).populate('interviewer interviewee');
     return interviewsHad;
@@ -56,7 +56,7 @@ export async function getById(_id: Types.ObjectId) {
     const interview = await InterviewModel.findById(_id);
 
     if (!interview) {
-      throw ApiError.badRequest('interview not found with this id');
+      throw ApiError.notFound('interview not found with this id');
     }
 
     return interview;
@@ -70,7 +70,7 @@ export async function getProfile(_id: Types.ObjectId) {
     const interview = await InterviewModel.findById(_id).populate('interviewer interviewee');
 
     if (!interview) {
-      throw ApiError.badRequest('interview not found with this id');
+      throw ApiError.notFound('interview not found with this id');
     }
 
     return interview;
@@ -139,7 +139,7 @@ export async function update(_id: Types.ObjectId, user: AuthenticatedUser, inter
     const interview = await getById(_id);
 
     if (!user._id.equals(interview.interviewer) && !user._id.equals(interview.interviewee)) {
-      throw ApiError.badRequest('Cannot update info, you are not a member in this interview');
+      throw ApiError.forbidden('Cannot update info, you are not a member in this interview');
     }
 
     if (interview.status !== InterviewStatus.Finished) {
@@ -164,11 +164,11 @@ export async function updateReview(_id: Types.ObjectId, user: AuthenticatedUser,
     const interview = await getById(_id);
 
     if (!user._id.equals(review.from)) {
-      throw ApiError.badRequest('Cannot update reviews, you are not the author of this review');
+      throw ApiError.unauthorized('Cannot update reviews, you are not the author of this review');
     }
 
     if (!user._id.equals(interview.interviewer) && !user._id.equals(interview.interviewee)) {
-      throw ApiError.badRequest('Cannot update reviews, you are not a member in this interview');
+      throw ApiError.unauthorized('Cannot update reviews, you are not a member in this interview');
     }
 
     if (!review.to.equals(interview.interviewer) && !review.to.equals(interview.interviewee)) {
@@ -210,7 +210,7 @@ export async function book(interview: IInterview, user: AuthenticatedUser) {
     ]);
 
     if (interviewer.role !== Role.Interviewer) {
-      throw ApiError.badRequest('Cannot save interview, interviewee cannot make interviews');
+      throw ApiError.unauthorized('Cannot save interview, interviewee cannot make interviews');
     }
 
     if (!interviewer.info || !interviewee.info) {
@@ -218,7 +218,7 @@ export async function book(interview: IInterview, user: AuthenticatedUser) {
     }
 
     if (!user._id.equals(interview.interviewer) && !user._id.equals(interview.interviewee)) {
-      throw ApiError.badRequest('Cannot save interview, you are not a member in this interview');
+      throw ApiError.unauthorized('Cannot save interview, you are not a member in this interview');
     }
 
     if (interview.interviewer.equals(interview.interviewee)) {
@@ -248,7 +248,7 @@ export async function reject(_id: Types.ObjectId, user: AuthenticatedUser) {
     const interview = await getById(_id);
 
     if (!user._id.equals(interview.interviewer) && !user._id.equals(interview.interviewee)) {
-      throw ApiError.badRequest('Cannot reject interview, you are not a member in this interview');
+      throw ApiError.unauthorized('Cannot reject interview, you are not a member in this interview');
     }
 
     if (interview.status === InterviewStatus.Rejected) {
@@ -277,7 +277,7 @@ export async function confirm(_id: Types.ObjectId, user: AuthenticatedUser) {
     }
 
     if (!interview.interviewer.equals(user._id)) {
-      throw ApiError.badRequest('You cannot confirm this interview');
+      throw ApiError.unauthorized('You cannot confirm this interview');
     }
 
     if (interview.status !== InterviewStatus.Pending) {
@@ -354,7 +354,7 @@ export async function markAsRejected(currentDate: Date) {
 export async function getInterviewsMadeWithReviews(user: IUser) {
   try {
     if (user.role === Role.Interviewee) {
-      throw ApiError.badRequest('Cannot get interviews made, interviewee role is not allowed to make interviews');
+      throw ApiError.unauthorized('Cannot get interviews made, interviewee role is not allowed to make interviews');
     }
     const interviewsMade = await InterviewModel.find({ interviewer: user._id });
     const interviewsWithReviews = interviewsMade.filter((interview) => interview.info && interview.info.reviews);
@@ -527,7 +527,7 @@ export async function getAllFinishedInterviewsByType(user: IUser, type: Intervie
     let interviews = null;
 
     if (type === InterviewType.Made && user.role === Role.Interviewee) {
-      throw ApiError.badRequest('Cannot get interviews made, interviewee role is not allowed to make interviews');
+      throw ApiError.unauthorized('Cannot get interviews made, interviewee role is not allowed to make interviews');
     }
 
     if (type === InterviewType.Had) {

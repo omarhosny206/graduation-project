@@ -77,7 +77,7 @@ export async function getByEmail(email: string) {
     const user = await UserModel.findOne({ email: email });
 
     if (!user) {
-      throw ApiError.badRequest('user not found with this email');
+      throw ApiError.notFound('user not found with this email');
     }
 
     return user;
@@ -387,7 +387,7 @@ export async function getById(_id: Types.ObjectId) {
     const user = await UserModel.findById(_id);
 
     if (!user) {
-      throw ApiError.badRequest('user not found with this id');
+      throw ApiError.notFound('user not found with this id');
     }
 
     return user;
@@ -401,7 +401,7 @@ export async function getByUserName(username: string) {
     const user = await UserModel.findOne({ username: username });
 
     if (!user) {
-      throw ApiError.badRequest('user not found with this username');
+      throw ApiError.notFound('user not found with this username');
     }
 
     return user;
