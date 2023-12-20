@@ -6,10 +6,6 @@ export default class ApiError extends Error {
         return new ResponseError(message, StatusCode.BadRequest);
     }
 
-    static internalServerError(message: string = 'Internal server error'): ResponseError {
-        return new ResponseError(message, StatusCode.InternalServerError);
-    }
-
     static unauthorized(message: string = 'Your not authorized to do this action'): ResponseError {
         return new ResponseError(message, StatusCode.Unauthorized);
     }
@@ -20,6 +16,18 @@ export default class ApiError extends Error {
 
     static notFound(message: string = 'URL not found'): ResponseError {
         return new ResponseError(message, StatusCode.NotFound);
+    }
+
+    static conflict(message: string = 'Conflict has occurred'): ResponseError {
+        return new ResponseError(message, StatusCode.Conflict);
+    }
+
+    static unprocessableEntity(message: string = 'Cannot process your request'): ResponseError {
+        return new ResponseError(message, StatusCode.UnprocessableEntity);
+    }
+
+    static internalServerError(message: string = 'Internal server error'): ResponseError {
+        return new ResponseError(message, StatusCode.InternalServerError);
     }
 
     static from(error: Error): ResponseError {
